@@ -1,0 +1,6 @@
+'use client';
+type Source={type:string;index?:number;title?:string;url?:string;period?:string;source?:string};
+export function ChatAnswer({answer}:{answer:{message:string;sources?:Source[];metadata?:{search_suggestions_html?:string}}}){
+ const sources=answer.sources||[];
+ return <><p>{answer.message.split(/(\[\d+\])/).map((part,i)=>{const n=/^\[(\d+)\]$/.exec(part);const source=n&&sources.find(s=>s.index===Number(n[1])&&s.type==='web');return source?.url?.startsWith('https://')?<a key={i} href={source.url} target="_blank" rel="noopener noreferrer" style={{color:'#168879',textDecoration:'underline'}}>{part}</a>:part})}</p>{sources.length>0&&<div className="citations">{sources.map((s,i)=>s.type==='web'&&s.url?.startsWith('https://')?<a key={i} href={s.url} target="_blank" rel="noopener noreferrer" style={{color:'#168879',textDecoration:'underline'}}>[{s.index}] {s.title}</a>:<span key={i}>{s.type==='bill'?'Hóa đơn':'Chỉ số'} {s.period} {s.source&&'· '+s.source}</span>)}</div>}{answer.metadata?.search_suggestions_html&&<iframe title="Gợi ý Google Search" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerPolicy="no-referrer" srcDoc={answer.metadata.search_suggestions_html} style={{width:'100%',height:160,border:0,marginTop:12}}/>}</>
+}

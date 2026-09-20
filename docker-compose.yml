@@ -1,0 +1,60 @@
+name: nha-minh-utilities
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: utility
+      POSTGRES_USER: utility
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/setup_env.py first}
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U utility -d utility"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  backend:
+    build: ./backend
+    environment: &backend_env
+      DATABASE_URL: postgresql+psycopg://utility:${POSTGRES_PASSWORD}@postgres:5432/utility
+      JWT_SECRET: ${JWT_SECRET:?Run scripts/setup_env.py first}
+      APP_ENV: development
+      LLM_PROVIDER: ${LLM_PROVIDER:-deterministic}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+      GEMINI_SEARCH_ENABLED: ${GEMINI_SEARCH_ENABLED:-true}
+      FRONTEND_URL: http://localhost:3000
+      TZ: Asia/Ho_Chi_Minh
+    command: ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+  scheduler:
+    build: ./backend
+    environment: *backend_env
+    command: ["python", "-m", "app.scheduler"]
+    depends_on:
+      backend:
+        condition: service_healthy
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+volumes:
+  postgres_data:
