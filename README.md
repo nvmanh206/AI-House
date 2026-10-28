@@ -158,23 +158,59 @@ V1 mặc định dùng provider **deterministic**, không gọi LLM bên ngoài.
 
 Giới hạn nghiệp vụ: một công tơ hoạt động/tài khoản; chỉ nhập kỳ mới; chưa có workflow điều chỉnh bill đã phát hành, thay công tơ giữa kỳ, hóa đơn chính thức và thuế/phí theo địa phương. Admin tạo phiên bản biểu giá mới để giữ lịch sử. Chưa có quên mật khẩu/email verification, email/SMS push hay LLM mạng. Xem báo cáo để phân biệt phần đã kiểm chứng với phần chưa kiểm chứng.
 
-## Khởi động hệ thống
+## 5. Tài khoản Đăng nhập & Tạo Dữ liệu Mẫu
 
-Đăng nhập bằng:
-- Chủ hộ: demo@example.com / DemoHouse123!
-- Admin: admin@example.com / AdminHouse123!
-Nếu đã tắt máy hoặc trang không mở, chạy lại như sau:
-1. Mở PowerShell, khởi động PostgreSQL:
-cd F:\Web\AI_Household_Utility_Billing\website
-python scripts/local_postgres.py start
-2. Trong cùng cửa sổ, chạy backend:
-cd backend
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
-3. Mở PowerShell thứ hai, chạy frontend:
-cd F:\Web\AI_Household_Utility_Billing\website\frontend
-npm.cmd run dev
-Giữ hai cửa sổ này mở rồi truy cập localhost:3000.
-Nếu muốn bật nhắc lịch tự động, mở thêm PowerShell:
-cd F:\Web\AI_Household_Utility_Billing\website\backend
-.\.venv\Scripts\python.exe -m app.scheduler
-Hiện tại không cần Docker, cài lại thư viện hay chạy seed lại.
+Hệ thống được thiết kế theo cơ chế **khởi tạo cơ sở dữ liệu sạch (Clean Bootstrap)** và hỗ trợ 2 hình thức sử dụng:
+
+### Cách 1: Tự đăng ký tài khoản (Khuyên dùng)
+- Truy cập màn hình đăng ký: [http://localhost:3000/register](http://localhost:3000/register)
+- Điền họ tên, email và mật khẩu của bạn.
+- **Cơ chế First Admin:** Nhờ cấu hình `BOOTSTRAP_FIRST_USER_ADMIN: "true"` trong Docker, **tài khoản đầu tiên được đăng ký trên hệ thống sẽ tự động được cấp quyền ADMIN** (toàn quyền quản trị hệ thống, biểu giá và kho tri thức RAG). Các tài khoản đăng ký sau sẽ là người dùng hộ gia đình thông thường (`USER`).
+
+### Cách 2: Khởi tạo dữ liệu mẫu tự động (Demo Seed)
+Nếu muốn nạp ngay bộ dữ liệu thử nghiệm (gồm 1 hộ gia đình mẫu Minh An, biểu giá mẫu, 12 kỳ chỉ số và 10 hóa đơn đã thanh toán), bạn hãy chạy lệnh seed dữ liệu:
+
+- **Nếu đang chạy bằng Docker:**
+  ```sh
+  docker compose exec backend python -m app.seed --demo
+  ```
+
+- **Nếu đang chạy Backend Python trực tiếp:**
+  ```sh
+  cd backend
+  python -m app.seed --demo
+  ```
+
+Sau khi chạy lệnh trên, bạn có thể đăng nhập bằng các tài khoản mẫu:
+- **Chủ hộ:** `demo@example.com` / `DemoHouse123!` (Gia đình Minh An)
+- **Quản trị viên:** `admin@example.com` / `AdminHouse123!` (Quản trị viên Demo)
+
+---
+
+## 6. Khởi động lại khi không dùng Docker (Tùy chọn Local Dev)
+
+Nếu bạn không sử dụng Docker mà chạy trực tiếp bằng môi trường Python và Node.js cục bộ:
+
+1. **Khởi động PostgreSQL cục bộ:**
+   ```sh
+   python scripts/local_postgres.py start
+   ```
+
+2. **Chạy Backend FastAPI (Cửa sổ Terminal 1):**
+   ```sh
+   cd backend
+   python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+   ```
+
+3. **Chạy Frontend Next.js (Cửa sổ Terminal 2):**
+   ```sh
+   cd frontend
+   npm run dev
+   ```
+   Truy cập ứng dụng tại [http://localhost:3000](http://localhost:3000).
+
+4. **Chạy Bộ lập lịch (Scheduler) nếu cần thu thập định kỳ (Cửa sổ Terminal 3):**
+   ```sh
+   cd backend
+   python -m app.scheduler
+   ```
