@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "tool_versions": {
+    "plantuml": "PlantUML version 1.2024.7 (Sat Sep 07 18:18:17 ICT 2024)\r\n(GPL source distribution)\r\nJava Runtime: OpenJDK Runtime Environment\r\nJVM: OpenJDK 64-Bit Server VM\r\nDefault Encoding: Cp1252\r\nLanguage: en\r\nCountry: US\r\n \r\nPLANTUML_LIMIT_SIZE: 4096\r\n\r\nDot version: dot - graphviz version 2.44.1 (20200629.0846)\r\nInstallation seems OK. File generation OK"
+  },
+  "files": [
+    {
+      "path": "docs/uml/sources/usecase/billing/bill_lookup_detail.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/billing/bill_lookup_detail.svg",
+        "docs/uml/sources/usecase/billing/bill_lookup_detail.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\billing\\bill_lookup_detail.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    }
+  ],
+  "scope": "Syntax/render only; semantic and visual review must be performed separately."
+}

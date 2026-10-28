@@ -13,6 +13,9 @@ def upgrade():
     sa.Column('provider_name', sa.String(length=120), nullable=False),
     sa.Column('name', sa.String(length=120), nullable=False),
     sa.Column('version', sa.String(length=40), nullable=False),
+    sa.Column('tariff_category', sa.String(length=40), nullable=False, server_default='RESIDENTIAL_1PHASE'),
+    sa.Column('province', sa.String(length=120), nullable=True),
+    sa.Column('rate_type', sa.String(length=20), nullable=False, server_default='TIERED'),
     sa.Column('effective_from', sa.Date(), nullable=False),
     sa.Column('effective_to', sa.Date(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
@@ -20,7 +23,7 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('utility_type', 'provider_name', 'version')
+    sa.UniqueConstraint('utility_type', 'provider_name', 'tariff_category', 'version')
     )
     op.create_table('users',
     sa.Column('email', sa.String(length=254), nullable=False),
@@ -166,6 +169,8 @@ def upgrade():
     sa.Column('provider_name', sa.String(length=120), nullable=False),
     sa.Column('provider_code', sa.String(length=80), nullable=False),
     sa.Column('customer_code', sa.String(length=80), nullable=False),
+    sa.Column('tariff_category', sa.String(length=40), nullable=False, server_default='RESIDENTIAL_1PHASE'),
+    sa.Column('province', sa.String(length=120), nullable=True),
     sa.Column('billing_day', sa.Integer(), nullable=False),
     sa.Column('due_day', sa.Integer(), nullable=False),
     sa.Column('reminder_days_before', sa.Integer(), nullable=False),

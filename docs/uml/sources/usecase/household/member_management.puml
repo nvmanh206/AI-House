@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Chủ hộ (Owner)" as owner
+actor "Thành viên (Member)" as member
+
+rectangle "Hệ thống Quản lý Hóa đơn Nhà Mình - Quản lý Thành viên" {
+    usecase "UC-MEMBER-MGMT\nQuản lý Danh sách & Phân quyền Thành viên" as UC_MemberMgmt
+    usecase "UC-MEMBER-INVITE\nMời Thành viên mới qua Email" as UC_Invite
+    usecase "UC-ACCEPT-INVITE\nXác nhận Tham gia Hộ gia đình" as UC_Accept
+}
+
+owner -- UC_MemberMgmt
+owner -- UC_Invite
+member -- UC_Accept
+
+UC_Invite ..> UC_MemberMgmt : <<extend>>
+@enduml

@@ -3,11 +3,15 @@ os.environ['JWT_SECRET']='test-only-secret-012345678901234567890'
 os.environ['DATABASE_URL']=os.environ.get('TEST_DATABASE_URL','sqlite://')
 os.environ['APP_ENV']='test'
 os.environ['LLM_PROVIDER']='deterministic'
+os.environ['GEMINI_QUOTA_GUARD_ENABLED']='false'
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
+from app.config import settings
+settings.llm_provider = 'deterministic'
+settings.knowledge_rag_enabled = False
 from app.db import Base,get_db
 from app.main import app,attempts
 from app.models import Tariff,TariffTier

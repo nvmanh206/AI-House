@@ -1,0 +1,30 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "User / Admin" as user
+participant "Web UI" as ui
+participant "FastAPI Router\n(POST /api/auth/logout)" as router
+database "PostgreSQL\n(auth_sessions)" as db
+
+title Sơ đồ Trình tự UC-LOGOUT: Đăng xuất hệ thống
+
+user -> ui: 1. Nhấn nút "Đăng xuất"
+activate ui
+ui -> router: 2. POST /api/auth/logout (Header: Bearer AccessToken)
+activate router
+
+router -> db: 3. UPDATE auth_sessions SET revoked = True WHERE id = session_id
+activate db
+db --> router: 4. OK
+deactivate db
+
+router --> ui: 5. HTTP 200 OK + Clear Refresh Cookie
+deactivate router
+
+ui -> ui: 6. Xóa AccessToken trong LocalStorage / Memory
+ui --> user: 7. Chuyển hướng người dùng về trang /login
+deactivate ui
+@enduml

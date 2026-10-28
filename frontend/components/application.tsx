@@ -1,16 +1,22 @@
 'use client';
 import Link from 'next/link';
+import { NoticeToast } from './notice-toast';
+import { ReadingBillingNotice } from './dashboard/reading-billing-notice';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState, FormEvent, ReactNode } from 'react';
-import { House, LayoutDashboard, Zap, Droplets, ReceiptText, ChartNoAxesCombined, Bell, Sparkles, Settings, Users, ArrowUpRight, ArrowDownRight, ArrowRight, Plus, ChevronRight, Menu, X, LogOut, Send, Check, ShieldCheck, Gauge, CalendarDays, Leaf, Download, AlertTriangle, Play, Star, PiggyBank, FileText, Lightbulb, FileSpreadsheet, Search, TrendingUp, TrendingDown, Eye, EyeOff, User, Mail, Lock, Globe, Heart, MessageSquare, Copy, Trash2, Mic, RotateCcw, Cpu, Bot, Info, CreditCard, PieChart } from 'lucide-react';
+import { useEffect, useState, useRef, FormEvent, ReactNode } from 'react';
+import { House, LayoutDashboard, Zap, Droplets, ReceiptText, ChartNoAxesCombined, Bell, Sparkles, Settings, Users, ArrowUpRight, ArrowDownRight, ArrowRight, Plus, ChevronRight, Menu, X, LogOut, Send, Check, ShieldCheck, ShieldAlert, Gauge, CalendarDays, Leaf, Download, AlertTriangle, Play, Star, PiggyBank, FileText, Lightbulb, FileSpreadsheet, Search, TrendingUp, TrendingDown, Eye, EyeOff, User, Mail, Lock, Globe, Heart, MessageSquare, Copy, Trash2, Pencil, Mic, RotateCcw, Cpu, Bot, Info, CreditCard, PieChart, Paperclip } from 'lucide-react';
 import { api, setToken, refreshSession } from './api';
 import { UsageChart, ExecutiveSpendingChart, CostBreakdownDonut, MonthlyComparisonBar, MiniSparkline } from './charts';
 import { ChatAnswer } from './chat-answer';
+import { InvoiceResultDetails } from './invoice-result-details';
+import { KnowledgeAdmin } from './knowledge-admin';
+import { chatStorageKey, persistableMessages } from './chat-state';
 import { DashboardBackground } from './dashboard/DashboardBackground';
 import { DashboardHeader } from './dashboard/DashboardHeader';
 import { StatGrid } from './dashboard/StatGrid';
 import { ExpenseTrendChart } from './dashboard/ExpenseTrendChart';
 import { CostBreakdown } from './dashboard/CostBreakdown';
+import { dashboardSummary } from './dashboard/dashboard-data';
 import { ComparisonChart } from './dashboard/ComparisonChart';
 import { BudgetProgress } from './dashboard/BudgetProgress';
 import { AIInsightPanel } from './dashboard/AIInsightPanel';
@@ -69,8 +75,69 @@ export default function Application() {
     const path = usePathname(), router = useRouter(), screen = path.slice(1) || 'landing';
     const [user, setUser] = useState<Row | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState(''), [toast, setToast] = useState(''), [mobile, setMobile] = useState(false), [notifications, setNotifications] = useState<Row[]>([]), [reload, setReload] = useState(0);
     const publicPage = ['landing', 'login', 'register'].includes(screen);
-    useEffect(() => { let alive = true; if (publicPage) { setLoading(false); return; } setLoading(true); (async () => { if (!await refreshSession()) { router.replace('/login'); return; } const me = await api('/auth/me'); if (!alive) return; setUser(me); if (!me.household_id && screen !== 'onboarding' && !screen.startsWith('admin')) { router.replace('/onboarding'); return; } if (me.household_id) { const n = await api('/notifications'); if (alive) setNotifications(n); } setLoading(false); })().catch(e => { if (alive) { setError(e.message); setLoading(false) } }); return () => { alive = false } }, [screen, publicPage, router, reload]);
-    useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(''), 4500); return () => clearTimeout(t) }, [toast]);
+    useEffect(() => {
+        let alive = true;
+        if (publicPage) {
+            setLoading(false);
+            return;
+        }
+        // If user session is already established, do not flash full-screen loading on internal route switches
+        if (!user) {
+            setLoading(true);
+        }
+        (async () => {
+            if (!user) {
+                if (!await refreshSession()) {
+                    if (alive) router.replace('/login');
+                    return;
+                }
+                const me = await api('/auth/me');
+                if (!alive) return;
+                setUser(me);
+                if (!me.household_id && screen !== 'onboarding' && !screen.startsWith('admin')) {
+                    router.replace('/onboarding');
+                    return;
+                }
+                if (me.household_id) {
+                    const n = await api('/notifications');
+                    if (alive) setNotifications(n);
+                    prefetchEndpoints([
+                        '/meters',
+                        '/readings',
+                        '/bills',
+                        '/statistics?months=6',
+                        '/households/current',
+                        '/households',
+                        '/utility-accounts',
+                        '/members'
+                    ]);
+                }
+            } else if (user?.household_id) {
+                const n = await api('/notifications');
+                if (alive) setNotifications(n);
+                if (reload > 0) {
+                    prefetchEndpoints([
+                        '/meters',
+                        '/readings',
+                        '/bills',
+                        '/statistics?months=6',
+                        '/households/current',
+                        '/households',
+                        '/utility-accounts',
+                        '/members'
+                    ]);
+                }
+            }
+            if (alive) setLoading(false);
+        })().catch(e => {
+            if (alive) {
+                setError(e.message);
+                setLoading(false);
+            }
+        });
+        return () => { alive = false; };
+    }, [publicPage, router, reload, screen]);
+    useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(''), 9000); return () => clearTimeout(t) }, [toast]);
     const notify = (message = 'Đã lưu thay đổi.') => { setToast(message); setReload(v => v + 1) };
     if (publicPage) return screen === 'landing' ? <Landing /> : <AuthForm register={screen === 'register'} />;
     if (loading) return <div className="loading-screen"><div className="brand"><span className="brand-icon"><House /></span>nhà mình<span className="brand-dot">.</span></div><div className="skeleton" /><p>Đang tải dữ liệu của bạn…</p></div>;
@@ -96,6 +163,7 @@ export default function Application() {
             onLogout={handleLogout}
             title={titles[screen]}
         >
+            <NoticeToast message={toast} onClose={()=>setToast('')} />
             {error && (
                 <div role="alert" className="p-4 mb-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 text-xs font-bold flex items-center justify-between">
                     <span>{error}</span>
@@ -470,7 +538,7 @@ function AuthForm({ register }: { register: boolean }) {
         setError('');
         const data = Object.fromEntries(new FormData(e.currentTarget));
         try {
-            const result = await api('/auth/' + (register ? 'register' : 'login'), 'POST', data);
+            const result = await api('/auth/' + (register ? 'register' : 'login'), 'POST', data, true, 15000);
             setToken(result.access_token);
             router.push(register ? '/onboarding' : '/dashboard');
         } catch (e: any) {
@@ -564,31 +632,139 @@ function Onboarding({ notify }: { notify: (s?: string) => void }) {
     return <div className="onboarding"><Link href="/" className="brand"><House />nhà mình.</Link><div className="steps">{['Gia đình', 'Điện', 'Nước', 'Xác nhận'].map((s, i) => <div key={s} className={i <= step ? 'selected' : ''}><span>{i < step ? <Check size={16} /> : i + 1}</span>{s}</div>)}</div><Panel><form key={step} onSubmit={next}><div className="eyebrow">BƯỚC {step + 1} / 4</div><h1>{['Ngôi nhà của bạn', 'Thiết lập tài khoản điện', 'Thiết lập tài khoản nước', 'Mọi thứ đã sẵn sàng?'][step]}</h1><p className="muted">{step === 3 ? 'Kiểm tra thông tin trước khi tạo hộ gia đình.' : 'Thông tin giúp tính hóa đơn và nhắc bạn đúng thời điểm.'}</p>{error && <div className="error">{error}</div>}{step === 0 ? <><Field label="Tên hộ gia đình" name="name" value={data.name} placeholder="Gia đình Nguyễn An" /><Field label="Địa chỉ" name="address" value={data.address} /><Field label="Số thành viên" name="member_count" type="number" value={data.member_count} min={1} max={100} /></> : step < 3 ? <><Field label="Nhà cung cấp" name="provider_name" value={accounts.find(a => a.utility_type === (step === 1 ? 'ELECTRICITY' : 'WATER'))?.provider_name || ''} placeholder="Tên nhà cung cấp trong biểu giá" /><Select label="Loại biểu giá / Công tơ" name="tariff_category" defaultValue={step === 1 ? 'RESIDENTIAL_1PHASE' : 'RESIDENTIAL'}>{step === 1 ? <><option value="RESIDENTIAL_1PHASE">Điện 1 pha sinh hoạt (6 bậc EVN)</option><option value="RESIDENTIAL_3PHASE">Điện 3 pha sinh hoạt</option><option value="COMMERCIAL">Điện kinh doanh / Dịch vụ</option><option value="INDUSTRIAL">Điện sản xuất</option></> : <><option value="RESIDENTIAL">Nước sinh hoạt</option><option value="COMMERCIAL">Nước kinh doanh</option><option value="INDUSTRIAL">Nước sản xuất</option></>}</Select><Field label="Tỉnh / Thành phố" name="province" required={false} placeholder="Ví dụ: TP. Hồ Chí Minh, Hà Nội" /><Field label="Mã khách hàng" name="customer_code" required={false} /><div className="form-grid"><Field label="Ngày có hóa đơn" name="billing_day" type="number" value={25} min={1} max={31} /><Field label="Ngày thanh toán dự kiến" name="due_day" type="number" value={28} min={1} max={31} /><Field label="Nhắc trước (ngày)" name="reminder_days_before" type="number" value={3} min={0} max={14} /><Field label="Chỉ số ban đầu" name="initial_reading" type="number" value={0} min={0} step="0.001" /></div><p className="help">Lịch do bạn cấu hình; không phải hạn chính thức của nhà cung cấp.</p></> : <div className="confirmation"><h2>{data.name}</h2><p>{data.address} · {data.member_count} thành viên</p>{accounts.map(a => <div key={a.utility_type}><strong>{a.utility_type === 'ELECTRICITY' ? 'Điện' : 'Nước'} · {a.provider_name} ({a.tariff_category || 'Sinh hoạt'})</strong><p>Chỉ số ban đầu {a.initial_reading} · Ngày dự kiến {a.due_day} · Nhắc trước {a.reminder_days_before} ngày</p></div>)}</div>}<div className="actions">{step > 0 && <button type="button" className="button secondary" onClick={() => setStep(step - 1)}>Quay lại</button>}<button disabled={busy} className="button">{busy ? 'Đang tạo…' : step === 3 ? 'Vào dashboard' : 'Tiếp tục'}<ArrowRight size={17} /></button>{step === 2 && <button type="button" className="text-button" onClick={() => { setAccounts(a => a.filter(v => v.utility_type !== 'WATER')); setStep(3) }}>Bỏ qua nước</button>}</div></form></Panel></div>
 }
 
-export function useData(paths: string[]) { const [data, setData] = useState<any[]>([]), [error, setError] = useState(''), [loading, setLoading] = useState(true); const key = paths.join('|'); useEffect(() => { let alive = true; setLoading(true); setError(''); Promise.all(key.split('|').map(p => api(p))).then(v => { if (alive) setData(v) }).catch(e => { if (alive) setError(e.message) }).finally(() => { if (alive) setLoading(false) }); return () => { alive = false } }, [key]); return { data, error, loading } }
+interface CacheEntry {
+    data: any;
+    timestamp: number;
+}
+
+const endpointCache = new Map<string, CacheEntry>();
+const cacheListeners = new Set<() => void>();
+let cacheGeneration = 0;
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds fresh TTL
+
+export function invalidateCache(paths?: string[]) {
+    cacheGeneration += 1;
+    if (!paths) {
+        endpointCache.clear();
+    } else {
+        paths.forEach(p => endpointCache.delete(p));
+    }
+    cacheListeners.forEach(refresh => refresh());
+}
+
+export function prefetchEndpoints(paths: string[]) {
+    const now = Date.now();
+    const generation = cacheGeneration;
+    paths.forEach(p => {
+        const cached = endpointCache.get(p);
+        if (!cached || (now - cached.timestamp > CACHE_TTL_MS)) {
+            api(p).then(res => {
+                if (generation === cacheGeneration) endpointCache.set(p, { data: res, timestamp: Date.now() });
+            }).catch(() => {});
+        }
+    });
+}
+
+export function useData(paths: string[]) {
+    const key = paths.join('|');
+    const [revision, setRevision] = useState(0);
+    useEffect(() => {
+        const refresh = () => setRevision(value => value + 1);
+        cacheListeners.add(refresh);
+        return () => { cacheListeners.delete(refresh); };
+    }, []);
+
+    const getValidCachedData = () => {
+        const now = Date.now();
+        const results: any[] = [];
+        let allValid = true;
+
+        for (const p of paths) {
+            const entry = endpointCache.get(p);
+            if (!entry) return null;
+            results.push(entry.data);
+            if (now - entry.timestamp > CACHE_TTL_MS) {
+                allValid = false;
+            }
+        }
+        return { data: results, isFresh: allValid };
+    };
+
+    const cachedInfo = getValidCachedData();
+    const [snapshot, setSnapshot] = useState({key, generation: cacheGeneration, values: cachedInfo ? cachedInfo.data : []});
+    const currentSnapshot = snapshot.key === key && snapshot.generation === cacheGeneration;
+    const data = currentSnapshot ? snapshot.values : [];
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(!cachedInfo);
+
+    useEffect(() => {
+        let alive = true;
+        const generation = cacheGeneration;
+        const now = Date.now();
+        const currentCached = getValidCachedData();
+        setError('');
+
+        if (currentCached) {
+            setSnapshot({key, generation, values: currentCached.data});
+            setLoading(false);
+            if (currentCached.isFresh) {
+                return; // ZERO network requests if cache is fresh (< 60s)
+            }
+        } else {
+            setSnapshot({key, generation, values: []});
+            setLoading(true);
+        }
+
+        Promise.all(paths.map(p => {
+            const entry = endpointCache.get(p);
+            if (entry && (now - entry.timestamp <= CACHE_TTL_MS)) {
+                return Promise.resolve(entry.data);
+            }
+            return api(p).then(res => {
+                if (generation === cacheGeneration) endpointCache.set(p, { data: res, timestamp: Date.now() });
+                return res;
+            });
+        }))
+        .then(v => {
+            if (alive && generation === cacheGeneration) {
+                paths.forEach((p, idx) => endpointCache.set(p, { data: v[idx], timestamp: Date.now() }));
+                setSnapshot({key, generation, values: v});
+                setError('');
+            }
+        })
+        .catch(e => {
+            if (alive && generation === cacheGeneration && (!currentCached || !currentCached.data)) setError(e.message);
+        })
+        .finally(() => {
+            if (alive && generation === cacheGeneration) setLoading(false);
+        });
+
+        return () => { alive = false; };
+    }, [key, revision]);
+
+    return { data, error: currentSnapshot ? error : '', loading: !currentSnapshot || (loading && data.length === 0) };
+}
 function LoadState({ error, loading }: { error: string; loading: boolean }) { return error ? <div className="error" role="alert">{error}</div> : loading ? <div className="skeleton-grid"><div className="skeleton" /><div className="skeleton" /><div className="skeleton wide" /></div> : null }
 function Dashboard({ user, notifications }: { user: Row; notifications: Row[] }) {
     const { data, error, loading } = useData(['/statistics?months=6', '/bills', '/households/current', '/readings']);
     const [trendRange, setTrendRange] = useState<'6' | '12'>('6');
 
-    if (error || loading) return <LoadState error={error} loading={loading} />;
+    if (error || (loading && (!data || !data.length))) return <LoadState error={error} loading={loading} />;
     const [stats, bills, house, readings] = data;
     const series = stats.series || [];
-    const month = localDate().slice(0, 7);
 
     const unpaid = bills.filter((b: Row) => ['UNPAID', 'OVERDUE'].includes(b.status)).sort((a: Row, b: Row) => a.due_date.localeCompare(b.due_date));
-    const totalUnpaidAmount = unpaid.reduce((sum: number, b: Row) => sum + Number(b.final_amount), 0) || 673200;
+    const totalUnpaidAmount = unpaid.reduce((sum: number, b: Row) => sum + Number(b.final_amount), 0);
     
-    const currentTotalCost = 673200;
-    const elecCost = 673200;
-    const waterCost = 0;
-    const elecUsage = 300;
-    const waterUsage = 0;
+    const summary = dashboardSummary(series);
+    const { electricityUsage: elecUsage, waterUsage, electricityCost: elecCost,
+        waterCost, totalCost: currentTotalCost } = summary;
 
-    const monthlyBudget = 2000000;
-    const budgetSpent = currentTotalCost;
-    const budgetRemaining = 1326800;
-    const budgetPercent = 34;
-    const forecastEstimate = 753984;
+    const monthlyBudget = house?.monthly_budget ? Number(house.monthly_budget) : 0;
+    const hasBudgetData = monthlyBudget > 0 && currentTotalCost !== null;
+    const budgetSpent = currentTotalCost ?? 0;
+    const budgetRemaining = Math.max(0, monthlyBudget - budgetSpent);
+    const budgetPercent = monthlyBudget > 0 ? Math.min(100, Math.round((budgetSpent / monthlyBudget) * 100)) : 0;
 
     return (
         <div className="space-y-5 pb-8">
@@ -622,6 +798,7 @@ function Dashboard({ user, notifications }: { user: Row; notifications: Row[] })
             </div>
 
             {/* 6 TOP KPI CARDS GRID */}
+            <ReadingBillingNotice readingCount={readings.length} billCount={bills.length} period={summary.period} electricityUsage={elecUsage} waterUsage={waterUsage} />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                 {/* CARD 1: TỔNG CHI PHÍ THÁNG */}
                 <GlassCard depth={2} className="p-4 flex flex-col justify-between space-y-3">
@@ -633,15 +810,14 @@ function Dashboard({ user, notifications }: { user: Row; notifications: Row[] })
                     </div>
                     <div>
                         <span className="text-[11px] font-semibold text-slate-500 block uppercase tracking-wide">
-                            TỔNG CHI PHÍ THÁNG
+                            TỔNG TIỀN ĐÃ GHI NHẬN
                         </span>
                         <strong className="text-xl font-extrabold text-slate-900 block mt-0.5">
-                            {money(currentTotalCost)}
+                            {currentTotalCost === null ? 'Chưa có hóa đơn' : money(currentTotalCost)}
                         </strong>
                     </div>
                     <div className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md w-fit">
-                        <ArrowUpRight size={12} />
-                        <span>8.2% so với tháng trước</span>
+                        <span>{summary.period ? `Kỳ ${summary.period}` : 'Chưa có kỳ dữ liệu'}</span>
                     </div>
                 </GlassCard>
 
@@ -658,15 +834,14 @@ function Dashboard({ user, notifications }: { user: Row; notifications: Row[] })
                             TIỀN ĐIỆN
                         </span>
                         <strong className="text-xl font-extrabold text-slate-900 block mt-0.5">
-                            {money(elecCost)}
+                            {elecCost === null ? (elecUsage===null?'Chưa ghi chỉ số':`${quantity(elecUsage)} kWh`) : money(elecCost)}
                         </strong>
                         <span className="text-[10px] text-slate-500 font-medium block">
-                            300 kWh
+                            {elecCost===null&&elecUsage!==null?'Lượng điện đã ghi · chưa có hóa đơn':elecUsage === null ? 'Chưa có lượng điện' : `${quantity(elecUsage)} kWh`}
                         </span>
                     </div>
-                    <div className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md w-fit">
-                        <ArrowUpRight size={12} />
-                        <span>8.2%</span>
+                    <div className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-500/15 border border-amber-500/25 px-2 py-0.5 rounded-md w-fit">
+                        <span>Điện sinh hoạt</span>
                     </div>
                 </GlassCard>
 
@@ -683,15 +858,14 @@ function Dashboard({ user, notifications }: { user: Row; notifications: Row[] })
                             TIỀN NƯỚC
                         </span>
                         <strong className="text-xl font-extrabold text-slate-900 block mt-0.5">
-                            0 ₫
+                            {waterCost === null ? (waterUsage===null?'Chưa ghi chỉ số':`${quantity(waterUsage)} m³`) : money(waterCost)}
                         </strong>
                         <span className="text-[10px] text-slate-500 font-medium block">
-                            0 m³
+                            {waterCost===null&&waterUsage!==null?'Lượng nước đã ghi · chưa có hóa đơn':waterUsage === null ? 'Chưa có lượng nước' : `${quantity(waterUsage)} m³`}
                         </span>
                     </div>
-                    <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md w-fit">
-                        <ArrowDownRight size={12} />
-                        <span>100%</span>
+                    <div className="inline-flex items-center gap-1 text-[10px] font-bold text-cyan-700 bg-cyan-500/15 border border-cyan-500/25 px-2 py-0.5 rounded-md w-fit">
+                        <span>Nước sinh hoạt</span>
                     </div>
                 </GlassCard>
 
@@ -708,11 +882,11 @@ function Dashboard({ user, notifications }: { user: Row; notifications: Row[] })
                             CHƯA THANH TOÁN
                         </span>
                         <strong className="text-xl font-extrabold text-slate-900 block mt-0.5">
-                            1 <span className="text-xs font-normal text-slate-500">hóa đơn</span>
+                            {unpaid.length} <span className="text-xs font-normal text-slate-500">hóa đơn</span>
                         </strong>
                     </div>
                     <div className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-500/15 border border-amber-500/25 px-2 py-0.5 rounded-md w-fit">
-                        <span>Cần trả: 673.200 ₫</span>
+                        <span>Cần trả: {money(totalUnpaidAmount)}</span>
                     </div>
                 </GlassCard>
 
@@ -729,14 +903,14 @@ function Dashboard({ user, notifications }: { user: Row; notifications: Row[] })
                             NGÂN SÁCH TIÊU DÙNG
                         </span>
                         <strong className="text-xl font-extrabold text-slate-900 block mt-0.5">
-                            34% <span className="text-xs font-normal text-slate-500">đã dùng</span>
+                            {hasBudgetData ? `${budgetPercent}% đã dùng` : monthlyBudget > 0 ? 'Chưa có chi phí' : 'Chưa thiết lập'}
                         </strong>
-                        <div className="w-full bg-slate-200/50 rounded-full h-1.5 mt-1.5 overflow-hidden">
-                            <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full w-[34%]" />
-                        </div>
+                        {hasBudgetData && <div className="w-full bg-slate-200/50 rounded-full h-1.5 mt-1.5 overflow-hidden">
+                            <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full" style={{ width: `${budgetPercent}%` }} />
+                        </div>}
                     </div>
                     <span className="text-[10px] text-slate-500 font-medium block">
-                        Còn lại: 1.326.800 ₫
+                        {hasBudgetData ? `Còn lại: ${money(budgetRemaining)}` : 'Cần ngân sách và chi phí để tính phần còn lại.'}
                     </span>
                 </GlassCard>
 
@@ -750,398 +924,1143 @@ function Dashboard({ user, notifications }: { user: Row; notifications: Row[] })
                     </div>
                     <div>
                         <span className="text-[11px] font-semibold text-slate-500 block uppercase tracking-wide">
-                            DỰ BÁO CUỐI THÁNG
+                            DỰ BÁO CHI PHÍ
                         </span>
                         <strong className="text-xl font-extrabold text-slate-900 block mt-0.5">
-                            753.984 ₫
+                            Chưa có dự báo
                         </strong>
                     </div>
                     <div className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-700 bg-purple-500/15 border border-purple-500/25 px-2 py-0.5 rounded-md w-fit">
-                        <span>AI dự đoán →</span>
+                        <Link href="/assistant" className="underline underline-offset-2">Mở trợ lý để xem điều kiện dự báo</Link>
                     </div>
                 </GlassCard>
             </div>
 
-            {/* MIDDLE ROW: SPLINE CHART + DONUT BREAKDOWN + AI ASSISTANT */}
+            {/* MIDDLE ROW: SPENDING TREND + COST BREAKDOWN + AI ASSISTANT */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                {/* 6-MONTH SPENDING TREND CHART (5 COLS) */}
-                <GlassCard depth={2} className="lg:col-span-5 p-5 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-sm font-extrabold text-slate-900">
-                                Xu hướng chi phí 6 tháng gần đây
-                            </h3>
-                            <span className="text-[11px] text-slate-500 font-medium">
-                                Tổng chi phí tiện ích (điện + nước)
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="flex items-center bg-white/40 border border-white/50 rounded-lg p-0.5 text-[11px] font-semibold text-slate-600">
-                                <button className="px-2.5 py-1 rounded-md bg-blue-600 text-white shadow-xs">6 tháng</button>
-                                <button className="px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-800">12 tháng</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* SVG SPLINE AREA CHART */}
-                    <div className="h-56 w-full pt-4 relative">
-                        <svg className="w-full h-full overflow-visible" viewBox="0 0 500 200" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.35" />
-                                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
-                                </linearGradient>
-                            </defs>
-                            {/* Grid Lines */}
-                            <line x1="0" y1="40" x2="500" y2="40" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />
-                            <line x1="0" y1="90" x2="500" y2="90" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />
-                            <line x1="0" y1="140" x2="500" y2="140" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />
-                            <line x1="0" y1="180" x2="500" y2="180" stroke="#cbd5e1" strokeWidth="1" opacity="0.5" />
-
-                            {/* Spline Path */}
-                            <path
-                                d="M 10,130 C 60,110 90,70 150,95 C 210,120 260,105 320,90 C 380,75 420,70 480,65 L 480,180 L 10,180 Z"
-                                fill="url(#chartGradient)"
-                            />
-                            <path
-                                d="M 10,130 C 60,110 90,70 150,95 C 210,120 260,105 320,90 C 380,75 420,70 480,65"
-                                fill="none"
-                                stroke="#3b82f6"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                            />
-
-                            {/* Data Nodes */}
-                            <circle cx="10" cy="130" r="4" fill="#3b82f6" />
-                            <circle cx="100" cy="95" r="4" fill="#3b82f6" />
-                            <circle cx="190" cy="110" r="4" fill="#3b82f6" />
-                            <circle cx="280" cy="95" r="4" fill="#3b82f6" />
-                            <circle cx="370" cy="80" r="4" fill="#3b82f6" />
-                            <circle cx="480" cy="65" r="6" fill="#3b82f6" stroke="#ffffff" strokeWidth="3" />
-                        </svg>
-
-                        {/* GLOWING TOOLTIP AT THÁNG 9 */}
-                        <div className="absolute top-[35px] right-[-10px] bg-white/90 backdrop-blur-md border border-blue-500/30 shadow-lg rounded-xl px-3 py-1.5 text-center pointer-events-none">
-                            <span className="text-[10px] text-slate-500 block font-medium">Tháng 9</span>
-                            <strong className="text-xs font-bold text-slate-900 block">673.200 ₫</strong>
-                            <span className="text-[9px] text-rose-600 font-bold block">▲ 8.2%</span>
-                        </div>
-
-                        {/* X-AXIS LABELS */}
-                        <div className="flex justify-between text-[11px] font-semibold text-slate-400 mt-2 px-1">
-                            <span>Tháng 4</span>
-                            <span>Tháng 5</span>
-                            <span>Tháng 6</span>
-                            <span>Tháng 7</span>
-                            <span>Tháng 8</span>
-                            <span className="text-blue-600 font-bold">Tháng 9</span>
-                        </div>
-                    </div>
-                </GlassCard>
-
-                {/* COST BREAKDOWN DONUT CHART (3 COLS) */}
-                <GlassCard depth={2} className="lg:col-span-3 p-5 flex flex-col justify-between space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-extrabold text-slate-900">
-                            Phân bổ chi phí tháng này
-                        </h3>
-                        <span className="text-[11px] font-semibold text-slate-500 bg-white/40 px-2.5 py-1 rounded-lg border border-white/50">
-                            Tháng 9 ▾
-                        </span>
-                    </div>
-
-                    {/* DONUT CHART DISPLAY */}
-                    <div className="relative w-40 h-40 mx-auto flex items-center justify-center my-2">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                            <path
-                                className="text-blue-500/20"
-                                strokeWidth="4"
-                                stroke="currentColor"
-                                fill="none"
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                            />
-                            <path
-                                className="text-amber-500"
-                                strokeDasharray="100, 100"
-                                strokeWidth="4.5"
-                                strokeLinecap="round"
-                                stroke="currentColor"
-                                fill="none"
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                            />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                            <strong className="text-sm font-extrabold text-slate-900">
-                                673.200 ₫
-                            </strong>
-                            <span className="text-[10px] text-slate-500 font-medium">
-                                Tổng chi phí
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* LEGEND */}
-                    <div className="space-y-1.5 pt-2 border-t border-white/30 text-xs font-semibold">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                                <span className="text-slate-700">Điện (100%)</span>
-                            </div>
-                            <span className="text-slate-900 font-bold">673.200 ₫</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                                <span className="text-slate-700">Nước (0%)</span>
-                            </div>
-                            <span className="text-slate-900 font-bold">0 ₫</span>
-                        </div>
-                    </div>
-                </GlassCard>
-
-                {/* AI ASSISTANT SIDE CARDS (4 COLS) */}
-                <GlassCard depth={2} className="lg:col-span-4 p-5 flex flex-col justify-between space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center">
-                                <Sparkles size={16} />
-                            </div>
-                            <h3 className="text-sm font-extrabold text-slate-900">Trợ lý AI</h3>
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-purple-500/20 text-purple-700 border border-purple-400/30">
-                                AI
-                            </span>
-                        </div>
-                        <span className="text-[10px] text-slate-500 font-medium">Trợ lý nhà mình.</span>
-                    </div>
-
-                    {/* 3 INSIGHT CARDS */}
-                    <div className="space-y-2.5">
-                        <div className="p-3 rounded-2xl bg-white/30 border border-white/50 flex items-start gap-3 hover:bg-white/50 transition-colors cursor-pointer">
-                            <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                                <Zap size={16} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <strong className="text-xs font-bold text-slate-900 block flex items-center justify-between">
-                                    <span>Xu hướng điện sinh hoạt tăng</span>
-                                    <ChevronRight size={14} className="text-slate-400" />
-                                </strong>
-                                <p className="text-[11px] text-slate-600 leading-tight mt-0.5">
-                                    Mức tiêu thụ điện tháng này tăng 8.2% so với tháng trước.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="p-3 rounded-2xl bg-white/30 border border-white/50 flex items-start gap-3 hover:bg-white/50 transition-colors cursor-pointer">
-                            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                                <Leaf size={16} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <strong className="text-xs font-bold text-slate-900 block flex items-center justify-between">
-                                    <span>Gợi ý tiết kiệm chi phí</span>
-                                    <ChevronRight size={14} className="text-slate-400" />
-                                </strong>
-                                <p className="text-[11px] text-slate-600 leading-tight mt-0.5">
-                                    Giảm sử dụng thiết bị không cần thiết có thể giúp tiết kiệm 80.000 – 120.000đ.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="p-3 rounded-2xl bg-white/30 border border-white/50 flex items-start gap-3 hover:bg-white/50 transition-colors cursor-pointer">
-                            <div className="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
-                                <House size={16} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <strong className="text-xs font-bold text-slate-900 block flex items-center justify-between">
-                                    <span>Mức chi phí đang hợp lý</span>
-                                    <ChevronRight size={14} className="text-slate-400" />
-                                </strong>
-                                <p className="text-[11px] text-slate-600 leading-tight mt-0.5">
-                                    Chi phí hiện tại thấp hơn 12% so với mức dự báo trung bình nhóm hộ tương tự.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </GlassCard>
+                <div className="lg:col-span-5">
+                    <ExpenseTrendChart series={series} />
+                </div>
+                <div className="lg:col-span-3">
+                    <CostBreakdown elecCost={elecCost} waterCost={waterCost} period={summary.period} />
+                </div>
+                <div className="lg:col-span-4">
+                    <AIInsightPanel />
+                </div>
             </div>
 
             {/* BOTTOM ROW: UPCOMING BILLS TABLE + RECENT NOTIFICATIONS */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                {/* UPCOMING BILLS TABLE (8 COLS) */}
-                <GlassCard depth={2} className="lg:col-span-8 p-5 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-extrabold text-slate-900">
-                            Hóa đơn sắp đến hạn
-                        </h3>
-                        <Link href="/bills" className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 text-decoration-none">
-                            <span>Xem tất cả</span>
-                            <ArrowRight size={14} />
-                        </Link>
-                    </div>
-
-                    {/* TABLE */}
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                            <thead>
-                                <tr className="border-b border-slate-200/50 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
-                                    <th className="pb-3 font-bold">LOẠI HÓA ĐƠN</th>
-                                    <th className="pb-3 font-bold">KỲ HÓA ĐƠN</th>
-                                    <th className="pb-3 font-bold">SỐ TIỀN</th>
-                                    <th className="pb-3 font-bold">HẠN THANH TOÁN</th>
-                                    <th className="pb-3 font-bold">TRẠNG THÁI</th>
-                                    <th className="pb-3 font-bold text-right">THAO TÁC</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100/50">
-                                <tr className="hover:bg-white/30 transition-colors">
-                                    <td className="py-3.5 font-bold text-slate-900 flex items-center gap-2.5">
-                                        <div className="w-7 h-7 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center">
-                                            <Zap size={15} />
-                                        </div>
-                                        <span>Tiền điện</span>
-                                    </td>
-                                    <td className="py-3.5 text-slate-600 font-semibold">09/2026</td>
-                                    <td className="py-3.5 font-extrabold text-slate-900">673.200 ₫</td>
-                                    <td className="py-3.5 text-slate-600 font-medium">28/09/2026</td>
-                                    <td className="py-3.5">
-                                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-800 border border-amber-500/30">
-                                            Chưa thanh toán
-                                        </span>
-                                    </td>
-                                    <td className="py-3.5 text-right">
-                                        <PrimaryButton size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md shadow-blue-500/20 text-[11px] py-1 px-3">
-                                            Thanh toán
-                                        </PrimaryButton>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </GlassCard>
-
-                {/* RECENT NOTIFICATIONS LIST (4 COLS) */}
-                <GlassCard depth={2} className="lg:col-span-4 p-5 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-extrabold text-slate-900">
-                            Thông báo gần đây
-                        </h3>
-                        <Link href="/notifications" className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 text-decoration-none">
-                            <span>Xem tất cả</span>
-                            <ArrowRight size={14} />
-                        </Link>
-                    </div>
-
-                    <div className="space-y-3">
-                        <div className="flex items-start gap-3 p-2.5 rounded-2xl bg-white/30 border border-white/40">
-                            <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
-                                <Zap size={16} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <strong className="text-xs font-bold text-slate-900 block leading-tight">
-                                    Hóa đơn tiền điện kỳ 09/2026 đã được tạo
-                                </strong>
-                                <span className="text-[10px] text-slate-400 font-medium block mt-1">
-                                    2 giờ trước
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-3 p-2.5 rounded-2xl bg-white/30 border border-white/40">
-                            <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center shrink-0 mt-0.5">
-                                <Bell size={16} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <strong className="text-xs font-bold text-slate-900 block leading-tight">
-                                    Cập nhật tính năng Trợ lý AI
-                                </strong>
-                                <span className="text-[10px] text-slate-400 font-medium block mt-1">
-                                    1 ngày trước
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-3 p-2.5 rounded-2xl bg-white/30 border border-white/40">
-                            <div className="w-8 h-8 rounded-xl bg-cyan-500/15 text-cyan-600 flex items-center justify-center shrink-0 mt-0.5">
-                                <Droplets size={16} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <strong className="text-xs font-bold text-slate-900 block leading-tight">
-                                    Chỉ số nước đã được ghi nhận
-                                </strong>
-                                <span className="text-[10px] text-slate-400 font-medium block mt-1">
-                                    2 ngày trước
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </GlassCard>
+                <div className="lg:col-span-8">
+                    <UpcomingBills bills={bills} />
+                </div>
+                <div className="lg:col-span-4">
+                    <NotificationPanel notifications={notifications} />
+                </div>
             </div>
         </div>
     );
 }
 function BillTable({ bills }: { bills: Row[] }) { return <DataTable rows={bills} columns={[{ title: 'Hóa đơn', render: b => <Link href={'/bills/' + b.id} className="bill-name"><span className={'utility-icon ' + b.utility_type.toLowerCase()}>{b.utility_type === 'ELECTRICITY' ? <Zap size={18} /> : <Droplets size={18} />}</span><div><strong>{b.utility_type === 'ELECTRICITY' ? 'Tiền điện' : 'Tiền nước'}</strong><small>Kỳ {b.period}</small></div></Link> }, { title: 'Số tiền', render: b => <strong>{money(b.final_amount)}</strong> }, { title: 'Hạn dự kiến', render: b => b.due_date }, { title: 'Trạng thái', render: b => <Badge status={b.status} /> }]} /> }
 
+function NotificationsPage({ notify }: { notify: (s?: string) => void }) {
+    const { data, error, loading } = useData(['/notifications']);
+    const [batchLoading, setBatchLoading] = useState(false);
+    if (error || (loading && (!data || !data[0]))) return <LoadState error={error} loading={loading} />;
+    const list: Row[] = data[0] || [];
+    const unreadCount = list.filter((n: Row) => !n.is_read).length;
+
+    const handleReadAll = async () => {
+        setBatchLoading(true);
+        try {
+            await api('/notifications/read-all', 'POST');
+            invalidateCache();
+            notify('Đã đánh dấu tất cả thông báo là đã đọc.');
+        } catch (e: any) {
+            notify(e.message || 'Không thể thực hiện yêu cầu.');
+        } finally {
+            setBatchLoading(false);
+        }
+    };
+
+    return (
+        <Panel
+            title="Danh sách thông báo"
+            action={
+                unreadCount > 0 ? (
+                    <button
+                        onClick={handleReadAll}
+                        disabled={batchLoading}
+                        className="button small"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                        <Check size={15} />
+                        {batchLoading ? 'Đang cập nhật…' : `Đánh dấu tất cả đã đọc (${unreadCount})`}
+                    </button>
+                ) : undefined
+            }
+        >
+            {list.length ? (
+                list.map((n: Row) => (
+                    <div key={n.id} className={'notification-row ' + (!n.is_read ? 'unread' : '')}>
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: !n.is_read ? '#fee2e2' : '#f1f5f9',
+                            color: !n.is_read ? '#ef4444' : '#64748b',
+                            flexShrink: 0
+                        }}>
+                            <Bell size={20} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: !n.is_read ? 700 : 600, color: !n.is_read ? '#0f172a' : '#475569' }}>
+                                    {n.title}
+                                </h3>
+                                {!n.is_read ? (
+                                    <span style={{ fontSize: '11px', padding: '1px 8px', borderRadius: '999px', background: '#fee2e2', color: '#b91c1c', fontWeight: 700, border: '1px solid #fca5a5' }}>
+                                        Chưa đọc
+                                    </span>
+                                ) : (
+                                    <span style={{ fontSize: '11px', padding: '1px 8px', borderRadius: '999px', background: '#f1f5f9', color: '#64748b', fontWeight: 500 }}>
+                                        Đã đọc
+                                    </span>
+                                )}
+                            </div>
+                            <p style={{ margin: '0 0 6px 0', fontSize: '13.5px', color: !n.is_read ? '#334155' : '#64748b', lineHeight: 1.5 }}>
+                                {n.message}
+                            </p>
+                            <small style={{ color: '#94a3b8', fontSize: '12px' }}>{new Date(n.created_at).toLocaleString('vi-VN')}</small>
+                        </div>
+                        {!n.is_read && (
+                            <div style={{ flexShrink: 0, alignSelf: 'center', marginLeft: '12px' }}>
+                                <Action
+                                    label="Đánh dấu đã đọc"
+                                    icon={<Check size={14} style={{ marginRight: '4px', display: 'inline' }} />}
+                                    run={() => api('/notifications/' + n.id + '/read', 'PATCH')}
+                                    done={() => notify('Đã đánh dấu thông báo đã đọc.')}
+                                />
+                            </div>
+                        )}
+                    </div>
+                ))
+            ) : (
+                <Empty>Chưa có thông báo nào.</Empty>
+            )}
+        </Panel>
+    );
+}
+
 function Page({ screen, user, notifications, notify }: { screen: string; user: Row; notifications: Row[]; notify: (s?: string) => void }) {
-    if (screen === 'assistant') return <Assistant />;
-    if (screen === 'notifications') return <Panel>{notifications.length ? notifications.map(n => <div key={n.id} className={'notification-row ' + (!n.is_read ? 'unread' : '')}><Bell size={22} /><div><h3>{n.title}</h3><p>{n.message}</p><small>{new Date(n.created_at).toLocaleString('vi-VN')}</small></div>{!n.is_read && <Action label="Đã đọc" run={() => api('/notifications/' + n.id + '/read', 'PATCH')} done={() => notify('Đã đánh dấu đã đọc.')} />}</div>) : <Empty>Chưa có thông báo.</Empty>}</Panel>;
+    if (screen === 'assistant') return <Assistant key={`${user?.id}:${user?.household_id}`} user={user} />;
+    if (screen === 'notifications') return <NotificationsPage notify={notify} />;
     if (screen === 'readings') return <Readings notify={notify} />;
-    if (screen === 'bills') return <Bills />;
+    if (screen === 'bills') return <Bills notify={notify} />;
     if (screen.startsWith('bills/')) return <BillDetail id={screen.split('/')[1]} notify={notify} />;
     if (screen === 'statistics') return <StatisticsPage />;
     if (screen === 'household') return <HouseholdPage notify={notify} />;
     if (screen === 'household/members') return <Members notify={notify} />;
     if (screen === 'meters') return <Meters notify={notify} />;
     if (screen === 'settings') return <SettingsPage user={user} notify={notify} />;
-    if (screen.startsWith('admin')) return user.role === 'ADMIN' ? <AdminPage screen={screen} notify={notify} /> : <div className="error">Bạn không có quyền quản trị.</div>;
+    if (screen.startsWith('admin')) return user && user.role === 'ADMIN' && user.is_active === true ? <AdminPage screen={screen} notify={notify} /> : <div className="p-8 text-center bg-white/80 backdrop-blur-2xl rounded-3xl border border-rose-200/80 shadow-xl max-w-lg mx-auto my-12 space-y-3"><div className="w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto"><ShieldAlert size={32} /></div><h2 className="text-xl font-extrabold text-slate-900">Truy cập bị từ chối (403 Forbidden)</h2><p className="text-xs text-slate-600 font-medium leading-relaxed">Tài khoản của bạn không có quyền quản trị viên hoặc đã bị vô hiệu hóa. Mọi truy cập trái phép đều được ghi nhận vào nhật ký an ninh hệ thống.</p></div>;
     return <Empty>Không tìm thấy trang.</Empty>
 }
-function Action({ label, run, done }: { label: string; run: () => Promise<any>; done: () => void }) { const [busy, setBusy] = useState(false), [error, setError] = useState(''); return <div><button disabled={busy} className="button small secondary" onClick={async () => { setBusy(true); setError(''); try { await run(); done() } catch (e: any) { setError(e.message) } finally { setBusy(false) } }}>{busy ? 'Đang xử lý…' : label}</button>{error && <p className="error">{error}</p>}</div> }
-function SaveForm({ children, submit, label = 'Lưu thay đổi' }: { children: ReactNode; submit: (data: Row) => Promise<any>; label?: string }) { const [error, setError] = useState(''), [busy, setBusy] = useState(false); return <form onSubmit={async e => { e.preventDefault(); setError(''); setBusy(true); try { await submit(Object.fromEntries(new FormData(e.currentTarget))) } catch (e: any) { setError(e.message) } finally { setBusy(false) } }}>{children}{error && <div className="error" role="alert">{error}</div>}<button className="button" disabled={busy}>{busy ? 'Đang lưu…' : label}<Check size={17} /></button></form> }
+function Action({ label, run, done, className = 'button small secondary', icon }: { label: string; run: () => Promise<any>; done: () => void; className?: string; icon?: ReactNode }) { const [busy, setBusy] = useState(false), [error, setError] = useState(''); return <div><button disabled={busy} className={className} onClick={async () => { setBusy(true); setError(''); try { await run(); invalidateCache(); done() } catch (e: any) { setError(e.message) } finally { setBusy(false) } }}>{busy ? 'Đang xử lý…' : <>{icon}{label}</>}</button>{error && <p className="error">{error}</p>}</div> }
+function SaveForm({ children, submit, label = 'Lưu thay đổi' }: { children: ReactNode; submit: (data: Row) => Promise<any>; label?: string }) { const [error, setError] = useState(''), [busy, setBusy] = useState(false); return <form onSubmit={async e => { e.preventDefault(); setError(''); setBusy(true); try { await submit(Object.fromEntries(new FormData(e.currentTarget))); invalidateCache(); } catch (e: any) { setError(e.message) } finally { setBusy(false) } }}>{children}{error && <div className="error" role="alert">{error}</div>}<button className="button" disabled={busy}>{busy ? 'Đang lưu…' : label}<Check size={17} /></button></form> }
 function Readings({ notify }: { notify: (s?: string) => void }) {
-    const { data, error, loading } = useData(['/meters', '/readings']); const [selected, setSelected] = useState(''); if (error || loading) return <LoadState error={error} loading={loading} />; const [meters, history] = data; const active = meters.filter((m: Row) => m.is_active), meter = active.find((m: Row) => m.id === selected) || active[0]; const previous = meter ? (history.filter((r: Row) => r.meter_id === meter.id).at(-1)?.current_reading ?? meter.initial_reading) : 0;
-    return <><div className="two-columns"><Panel title="Ghi chỉ số mới">{!meter ? <Empty href="/meters">Thêm công tơ trước khi nhập chỉ số.</Empty> : <SaveForm label="Lưu và tạo hóa đơn" submit={async values => { const [year, month] = values.period.split('-').map(Number); delete values.period; await api('/readings', 'POST', { ...values, year, month }); notify('Đã lưu chỉ số và tạo hóa đơn.') }}><Select label="Công tơ" name="meter_id" value={meter.id} onChange={(e: any) => setSelected(e.target.value)}>{active.map((m: Row) => <option key={m.id} value={m.id}>{m.name} · {m.unit}</option>)}</Select><div className="form-grid"><Field label="Kỳ hóa đơn" name="period" type="month" value={localDate().slice(0, 7)} /><Field label="Ngày ghi" name="reading_date" type="date" value={localDate()} max={localDate()} /></div><div className="reading-previous"><span>Chỉ số kỳ trước</span><strong>{quantity(previous)} {meter.unit}</strong></div><Field key={meter.id} label={`Chỉ số hiện tại (${meter.unit})`} name="current_reading" type="number" min={previous} step="0.001" /><p className="help">Lượng dùng được tính bằng chỉ số mới trừ chỉ số trước. Biểu giá cần được quản trị viên cấu hình cho đúng nhà cung cấp.</p></SaveForm>}</Panel><div className="guidance"><span className="symbol"><Gauge size={28} /></span><h2>Một lần nhập.<br />Mọi con số rõ ràng.</h2><p>Ghi toàn bộ chỉ số hiện tại trên công tơ. Hệ thống sẽ lấy chỉ số trước, tính lượng dùng và lưu biểu giá vào hóa đơn.</p><ol><li>Chọn đúng công tơ và kỳ.</li><li>Nhập chỉ số, không nhập lượng tiêu thụ.</li><li>Kiểm tra hóa đơn ước tính vừa tạo.</li></ol><p className="help">V1 nhận dữ liệu nhập tay. Thay công tơ hoặc điều chỉnh kỳ cũ cần được xử lý riêng.</p></div></div><Panel title="Lịch sử ghi chỉ số"><DataTable rows={[...history].reverse()} columns={[{ title: 'Kỳ', render: r => r.period }, { title: 'Loại', render: r => r.utility_type === 'ELECTRICITY' ? 'Điện' : 'Nước' }, { title: 'Chỉ số trước', render: r => quantity(r.previous_reading) }, { title: 'Chỉ số mới', render: r => quantity(r.current_reading) }, { title: 'Tiêu thụ', render: r => <strong>{quantity(r.consumption)} {r.unit}</strong> }, { title: 'Nguồn', render: r => r.source }]} /></Panel></>
-}
-function Bills() { const [period, setPeriod] = useState(''), [status, setStatus] = useState(''), [utility, setUtility] = useState(''); const { data, error, loading } = useData(['/bills']); return <Panel><div className="filters"><Field label="Kỳ" name="period" type="month" value="" required={false} onChange={(e: any) => setPeriod(e.target.value)} /><Select label="Trạng thái" onChange={(e: any) => setStatus(e.target.value)}><option value="">Tất cả</option>{Object.entries(statusNames).map(([k, v]) => <option key={k} value={k}>{String(v)}</option>)}</Select><Select label="Tiện ích" onChange={(e: any) => setUtility(e.target.value)}><option value="">Điện và nước</option><option value="ELECTRICITY">Điện</option><option value="WATER">Nước</option></Select></div>{loading || error ? <LoadState error={error} loading={loading} /> : <BillTable bills={data[0].filter((b: Row) => (!period || b.period === period) && (!status || b.status === status) && (!utility || b.utility_type === utility))} />}</Panel> }
-function BillDetail({ id, notify }: { id: string; notify: (s?: string) => void }) { const { data, error, loading } = useData(['/bills/' + id]); if (error || loading) return <LoadState error={error} loading={loading} />; const b = data[0], detail = b.bill_detail_snapshot; return <Panel><div className="bill-detail-head"><div><span className="eyebrow">HÓA ĐƠN ƯỚC TÍNH</span><h2>{b.bill_code}</h2><p>Kỳ {b.period} · {b.utility_type === 'ELECTRICITY' ? 'Điện' : 'Nước'}</p></div><Badge status={b.status} /></div><div className="bill-summary"><div><span>Chỉ số trước</span><strong>{quantity(detail.previous_reading)}</strong></div><div><span>Chỉ số mới</span><strong>{quantity(detail.current_reading)}</strong></div><div><span>Tiêu thụ</span><strong>{quantity(b.consumption)} {b.utility_type === 'ELECTRICITY' ? 'kWh' : 'm³'}</strong></div><div><span>Hạn dự kiến</span><strong>{b.due_date}</strong></div></div><h3>Chi tiết biểu giá · {b.tariff_version_snapshot.version}</h3><DataTable rows={detail.tiers} columns={[{ title: 'Bậc', render: r => `${r.from} – ${r.to ?? 'trở lên'}` }, { title: 'Lượng dùng', render: r => quantity(r.quantity) }, { title: 'Đơn giá', render: r => money(r.unit_price) }, { title: 'Thành tiền', render: r => money(r.amount) }]} /><div className="bill-totals"><p>Ước tính <strong>{money(b.estimated_amount)}</strong></p><p>Số tiền chính thức <strong>{b.official_amount === null ? 'Chưa có' : money(b.official_amount)}</strong></p><h2>Tổng cộng <span>{money(b.final_amount)}</span></h2></div><p className="help">Nguồn hóa đơn: {b.source} · Nguồn chỉ số: {detail.reading_source}. {detail.tax_note} Ngày đến hạn theo cấu hình, chưa xác nhận từ nhà cung cấp.</p><div className="actions">{['UNPAID', 'OVERDUE'].includes(b.status) && <Action label="Tôi đã thanh toán (ghi nhận thủ công)" run={() => api('/payments', 'POST', { bill_id: id })} done={() => notify('Đã ghi nhận thanh toán thủ công.')} />}<button className="button secondary" onClick={() => window.print()}><Download size={17} />In / Lưu PDF</button></div></Panel> }
-function Statistics() { const [months, setMonths] = useState('6'), [start, setStart] = useState(''), [end, setEnd] = useState(''); const custom = months === 'custom'; const query = custom && start && end ? `start=${start}&end=${end}` : `months=${custom ? '6' : months}`; const { data, error, loading } = useData(['/statistics?' + query]); return <><div className="filters"><Select label="Khoảng thời gian" value={months} onChange={(e: any) => setMonths(e.target.value)}><option value="3">3 tháng</option><option value="6">6 tháng</option><option value="12">12 tháng</option><option value="custom">Tùy chọn</option></Select>{custom && <><Field label="Từ ngày" type="date" required={false} onChange={(e: any) => setStart(e.target.value)} /><Field label="Đến ngày" type="date" required={false} onChange={(e: any) => setEnd(e.target.value)} /></>}</div>{error || loading ? <LoadState error={error} loading={loading} /> : <><div className="metric-grid">{['ELECTRICITY', 'WATER', 'cost'].map((k, i) => <Panel title={['Điện · kWh', 'Nước · m³', 'Chi phí · VND'][i]} key={k}><div className="stat-value">{data[0].summary[k].average === null ? '—' : i === 2 ? money(data[0].summary[k].average) : quantity(data[0].summary[k].average)}</div><p className="muted">Trung bình các kỳ đã nhập</p><div className="stat-range"><span>Thấp nhất <strong>{data[0].summary[k].lowest === null ? '—' : quantity(data[0].summary[k].lowest)}</strong></span><span>Cao nhất <strong>{data[0].summary[k].highest === null ? '—' : quantity(data[0].summary[k].highest)}</strong></span></div></Panel>)}</div><Panel title="Điện và nước theo kỳ"><UsageChart data={data[0].series} /></Panel><Panel title="Chi phí theo kỳ"><UsageChart data={data[0].series} cost /></Panel><Panel title="Dữ liệu chi tiết"><DataTable rows={data[0].series} columns={[{ title: 'Kỳ', render: r => r.period }, { title: 'Điện (kWh)', render: r => quantity(r.ELECTRICITY) }, { title: 'Nước (m³)', render: r => quantity(r.WATER) }, { title: 'Chi phí', render: r => money(r.cost) }]} /><p className="help">{data[0].note}</p></Panel></>}</> }
+    const { data, error, loading } = useData(['/meters', '/readings']);
+    const [selectedMeterId, setSelectedMeterId] = useState('');
+    const [selectedPeriod, setSelectedPeriod] = useState(localDate().slice(0, 7));
+    const [readingDate, setReadingDate] = useState(localDate());
+    const [saveBusy,setSaveBusy]=useState(false),[saveError,setSaveError]=useState(''),[saveNotice,setSaveNotice]=useState('');
 
-function HouseholdPage({ notify }: { notify: (s?: string) => void }) { const { data, error, loading } = useData(['/households/current', '/households', '/utility-accounts']); if (error || loading) return <LoadState error={error} loading={loading} />; const [h, houses, accounts] = data; return <><div className="two-columns"><Panel title="Thông tin hộ" action={<Link href="/household/members" className="subtle-link">Thành viên <Users size={17} /></Link>}><SaveForm submit={async values => { await api('/households/current', 'PATCH', { ...values, member_count: Number(values.member_count) }); notify() }}><Field label="Tên hộ" name="name" value={h.name} /><Field label="Địa chỉ" name="address" value={h.address} /><div className="form-grid"><Field label="Tỉnh / thành phố" name="province" value={h.province} required={false} /><Field label="Quận / huyện" name="district" value={h.district} required={false} /><Field label="Phường / xã" name="ward" value={h.ward} required={false} /><Field label="Số thành viên" name="member_count" type="number" min={1} max={100} value={h.member_count} /></div></SaveForm></Panel><Panel title="Không gian gia đình">{houses.map((house: Row) => <div className="house-choice" key={house.id}><House size={23} /><strong>{house.name}</strong>{house.id === h.id ? <Badge status="Đang chọn" /> : <Action label="Chuyển hộ" run={() => api('/households/' + house.id + '/select', 'POST')} done={() => notify('Đã chuyển hộ.')} />}</div>)}<Link href="/onboarding" className="button secondary"><Plus size={16} />Thêm hộ gia đình</Link></Panel></div>{accounts.map((a: Row) => <Panel key={a.id} title={a.utility_type === 'ELECTRICITY' ? 'Tài khoản điện' : 'Tài khoản nước'}><SaveForm submit={async values => { await api('/utility-accounts/' + a.id, 'PATCH', { ...values, utility_type: a.utility_type, billing_day: Number(values.billing_day), due_day: Number(values.due_day), reminder_days_before: Number(values.reminder_days_before) }); notify() }}><div className="form-grid"><Field label="Nhà cung cấp" name="provider_name" value={a.provider_name} /><Select label="Loại biểu giá / Công tơ" name="tariff_category" defaultValue={a.tariff_category || (a.utility_type === 'ELECTRICITY' ? 'RESIDENTIAL_1PHASE' : 'RESIDENTIAL')}>{a.utility_type === 'ELECTRICITY' ? <><option value="RESIDENTIAL_1PHASE">Điện 1 pha sinh hoạt (6 bậc EVN)</option><option value="RESIDENTIAL_3PHASE">Điện 3 pha sinh hoạt</option><option value="COMMERCIAL">Điện kinh doanh / Dịch vụ</option><option value="INDUSTRIAL">Điện sản xuất</option></> : <><option value="RESIDENTIAL">Nước sinh hoạt</option><option value="COMMERCIAL">Nước kinh doanh</option><option value="INDUSTRIAL">Nước sản xuất</option></>}</Select><Field label="Tỉnh / Thành phố" name="province" value={a.province} required={false} placeholder="Ví dụ: TP. Hồ Chí Minh" /><Field label="Mã khách hàng" name="customer_code" value={a.customer_code} required={false} /><Field label="Ngày có hóa đơn" type="number" name="billing_day" value={a.billing_day} min={1} max={31} /><Field label="Ngày thanh toán dự kiến" type="number" name="due_day" value={a.due_day} min={1} max={31} /><Field label="Nhắc trước (ngày)" type="number" name="reminder_days_before" value={a.reminder_days_before} min={0} max={14} /></div></SaveForm></Panel>)}</> }
-function Members({ notify }: { notify: (s?: string) => void }) { const { data, error, loading } = useData(['/members']); return <div className="two-columns"><Panel title="Thành viên trong hộ">{error || loading ? <LoadState error={error} loading={loading} /> : <DataTable rows={data[0]} columns={[{ title: 'Họ tên', render: r => <div><strong>{r.full_name}</strong><small>{r.email}</small></div> }, { title: 'Quyền', render: r => r.role === 'OWNER' ? 'Chủ hộ' : r.permissions.join(', ') || 'Chỉ xem' }, { title: 'Thao tác', render: r => r.role !== 'OWNER' && <Action label="Xóa khỏi hộ" run={() => api('/members/' + r.id, 'DELETE')} done={() => notify()} /> }]} />}</Panel><Panel title="Thêm thành viên"><SaveForm label="Thêm thành viên" submit={async values => { await api('/members', 'POST', { email: values.email, permissions: values.permission === 'write' ? ['write'] : values.permission === 'pay' ? ['pay'] : [] }); notify() }}><Field label="Email đã đăng ký" name="email" type="email" /><Select label="Quyền thành viên" name="permission"><option value="read">Chỉ xem</option><option value="write">Nhập chỉ số và quản lý công tơ</option><option value="pay">Ghi nhận thanh toán</option></Select><p className="help">Người được thêm cần có tài khoản trước. Quyền được kiểm tra tại máy chủ.</p></SaveForm></Panel></div> }
-function Meters({ notify }: { notify: (s?: string) => void }) { const { data, error, loading } = useData(['/meters', '/utility-accounts']); const [edit, setEdit] = useState<Row | null>(null); if (error || loading) return <LoadState error={error} loading={loading} />; return <div className="two-columns"><Panel title="Danh sách công tơ">{data[0].map((m: Row) => <div className="meter-card" key={m.id}><span className={'utility-icon ' + m.utility_type.toLowerCase()}>{m.utility_type === 'ELECTRICITY' ? <Zap /> : <Droplets />}</span><div><h3>{m.name}</h3><p>{m.meter_code || 'Chưa có mã'} · Ban đầu: {quantity(m.initial_reading)} {m.unit}</p><Badge status={m.is_active ? 'Hoạt động' : 'Đã ngừng'} /></div><button className="text-button" onClick={() => setEdit(m)}>Sửa</button></div>)}</Panel><Panel title={edit ? 'Sửa công tơ' : 'Thêm công tơ'}><SaveForm key={edit?.id || 'new'} submit={async values => { if (edit) { await api('/meters/' + edit.id, 'PATCH', { ...values, is_active: values.is_active === 'true' }); setEdit(null) } else await api('/meters', 'POST', values); notify() }}><Field label="Tên công tơ" name="name" value={edit?.name} /><Field label="Mã công tơ" name="meter_code" value={edit?.meter_code} required={false} />{edit ? <Select label="Trạng thái" name="is_active" defaultValue={String(edit.is_active)}><option value="true">Hoạt động</option><option value="false">Ngừng hoạt động</option></Select> : <><Select label="Tài khoản" name="utility_account_id">{data[1].map((a: Row) => <option key={a.id} value={a.id}>{a.provider_name} · {a.utility_type === 'ELECTRICITY' ? 'Điện' : 'Nước'}</option>)}</Select><Field label="Chỉ số ban đầu" name="initial_reading" type="number" min={0} value={0} step="0.001" /></>}<p className="help">Mỗi tài khoản dùng một công tơ hoạt động trong V1.</p></SaveForm>{edit && <button className="text-button" onClick={() => setEdit(null)}>Hủy chỉnh sửa</button>}</Panel></div> }
+    // Filter & search states
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterMeter, setFilterMeter] = useState('ALL');
+    const [filterUtility, setFilterUtility] = useState('ALL');
+    const [filterYear, setFilterYear] = useState('ALL');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
+
+    // Modal states for CRUD
+    const [editingReading, setEditingReading] = useState<Row | null>(null);
+    const [editBusy, setEditBusy] = useState(false);
+    const [editError, setEditError] = useState('');
+    const [deletingReading, setDeletingReading] = useState<Row | null>(null);
+    const [deleteBusy, setDeleteBusy] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
+
+    if (error) return <LoadState error={error} loading={false} />;
+    if (loading && (!data || !data[0] || !data[1])) return <LoadState error="" loading={true} />;
+    const [meters, history] = data;
+    const activeMeters: Row[] = meters ? meters.filter((m: Row) => m.is_active) : [];
+    const currentMeter = activeMeters.find((m: Row) => m.id === selectedMeterId) || activeMeters[0];
+
+    // Compute previous reading dynamically based on selected meter and selected period
+    const meterReadings: Row[] = (history || []).filter((r: Row) => currentMeter && r.meter_id === currentMeter.id);
+    const priorReadings = meterReadings.filter((r: Row) => r.period < selectedPeriod).sort((a: Row, b: Row) => a.period.localeCompare(b.period));
+    const previousReading = priorReadings.length > 0 ? priorReadings[priorReadings.length - 1].current_reading : (currentMeter?.initial_reading ?? 0);
+    const existingForPeriod = meterReadings.find((r: Row) => r.period === selectedPeriod);
+
+    // Sync reading_date when selectedPeriod changes
+    const handlePeriodChange = (val: string) => {
+        setSelectedPeriod(val);
+        const [y, m] = val.split('-').map(Number);
+        const todayStr = localDate();
+        const [curY, curM] = todayStr.split('-').map(Number);
+        if (y === curY && m === curM) {
+            setReadingDate(todayStr);
+        } else {
+            const lastDay = new Date(y, m, 0).getDate();
+            const day = Math.min(25, lastDay);
+            setReadingDate(`${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+        }
+    };
+
+    // Filter history
+    const allHistory: Row[] = history ? [...history].reverse() : [];
+    const availableYears = Array.from(new Set(allHistory.map((r: Row) => r.period?.slice(0, 4)).filter(Boolean))).sort().reverse();
+
+    const filteredHistory = allHistory.filter((r: Row) => {
+        if (filterMeter !== 'ALL' && r.meter_id !== filterMeter) return false;
+        if (filterUtility !== 'ALL' && r.utility_type !== filterUtility) return false;
+        if (filterYear !== 'ALL' && !r.period?.startsWith(filterYear)) return false;
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase().trim();
+            const matchPeriod = r.period?.toLowerCase().includes(q);
+            const matchSource = r.source?.toLowerCase().includes(q);
+            const matchMeter = (r.meter_name || '').toLowerCase().includes(q);
+            if (!matchPeriod && !matchSource && !matchMeter) return false;
+        }
+        return true;
+    });
+
+    const totalPages = Math.max(1, Math.ceil(filteredHistory.length / pageSize));
+    const safeCurrentPage = Math.min(currentPage, totalPages);
+    const paginatedHistory = filteredHistory.slice((safeCurrentPage - 1) * pageSize, safeCurrentPage * pageSize);
+
+    const handleEditSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!editingReading) return;
+        setEditBusy(true);
+        setEditError('');
+        try {
+            const fd = new FormData(e.currentTarget);
+            const currentReadingVal = Number(fd.get('current_reading'));
+            const readingDateVal = fd.get('reading_date') as string;
+            await api('/readings/' + editingReading.id, 'PATCH', {
+                current_reading: currentReadingVal,
+                reading_date: readingDateVal
+            });
+            invalidateCache();
+            notify('Đã cập nhật chỉ số và tính lại hóa đơn.');
+            setEditingReading(null);
+        } catch (err: any) {
+            setEditError(err.message || 'Không thể cập nhật chỉ số.');
+        } finally {
+            setEditBusy(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!deletingReading) return;
+        setDeleteBusy(true);
+        setDeleteError('');
+        try {
+            await api('/readings/' + deletingReading.id, 'DELETE');
+            invalidateCache();
+            notify('Đã xóa chỉ số thành công.');
+            setDeletingReading(null);
+        } catch (err: any) {
+            setDeleteError(err.message || 'Không thể xóa chỉ số.');
+        } finally {
+            setDeleteBusy(false);
+        }
+    };
+
+    return (
+        <>
+            <div className="two-columns">
+                <Panel title="Ghi chỉ số mới">
+                    {!currentMeter ? (
+                        <Empty href="/meters">Thêm công tơ trước khi nhập chỉ số.</Empty>
+                    ) : (
+                        <form
+                            onSubmit={async (e) => {
+                                e.preventDefault();
+                                if(saveBusy)return;
+                                setSaveBusy(true);setSaveError('');setSaveNotice('');
+                                const fd = new FormData(e.currentTarget);
+                                const currentReadingVal = Number(fd.get('current_reading'));
+                                const [year, month] = selectedPeriod.split('-').map(Number);
+                                try {
+                                    const saved = await api('/readings', 'POST', {
+                                        meter_id: currentMeter.id,
+                                        year,
+                                        month,
+                                        current_reading: currentReadingVal,
+                                        reading_date: readingDate
+                                    },true,20000);
+                                    invalidateCache();
+                                    const message=saved.bill?`Đã lưu chỉ số kỳ ${month}/${year} và tạo hóa đơn.`:`Đã lưu chỉ số kỳ ${month}/${year}. Chưa tạo hóa đơn vì chưa có biểu giá phù hợp với nhà cung cấp, nhóm sử dụng và khu vực của công tơ. Hãy cấu hình biểu giá trong Quản trị hệ thống.`;
+                                    setSaveNotice(message);notify(message);
+                                } catch (err: any) {
+                                    const message=err.message || 'Không thể lưu chỉ số.';
+                                    setSaveError(message);notify(message);
+                                } finally {setSaveBusy(false);}
+                            }}
+                        >
+                            <label className="field">
+                                <span>Công tơ</span>
+                                <select
+                                    value={currentMeter.id}
+                                    onChange={(e) => setSelectedMeterId(e.target.value)}
+                                >
+                                    {activeMeters.map((m: Row) => (
+                                        <option key={m.id} value={m.id}>
+                                            {m.name} · {m.unit} ({m.utility_type === 'ELECTRICITY' ? 'Điện' : 'Nước'})
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <div className="form-grid">
+                                <label className="field">
+                                    <span>Kỳ hóa đơn (tháng/năm)</span>
+                                    <input
+                                        type="month"
+                                        value={selectedPeriod}
+                                        onChange={(e) => handlePeriodChange(e.target.value)}
+                                        required
+                                    />
+                                </label>
+                                <label className="field">
+                                    <span>Ngày ghi chỉ số</span>
+                                    <input
+                                        type="date"
+                                        value={readingDate}
+                                        onChange={(e) => setReadingDate(e.target.value)}
+                                        max={localDate()}
+                                        required
+                                    />
+                                </label>
+                            </div>
+
+                            <div className="reading-previous" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+                                <div>
+                                    <span style={{ fontSize: '12.5px', color: '#64748b', display: 'block' }}>Chỉ số kỳ trước</span>
+                                    <small style={{ color: '#94a3b8' }}>
+                                        {priorReadings.length > 0 ? `(Kỳ ${priorReadings[priorReadings.length - 1].period})` : '(Mức ban đầu)'}
+                                    </small>
+                                </div>
+                                <strong style={{ fontSize: '18px', color: '#0f172a' }}>
+                                    {quantity(previousReading)} {currentMeter?.unit || ''}
+                                </strong>
+                            </div>
+
+                            {existingForPeriod ? (
+                                <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', padding: '12px 14px', marginBottom: '16px', color: '#92400e', fontSize: '13px', lineHeight: 1.5 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, marginBottom: '2px' }}>
+                                        <AlertTriangle size={16} /> Kỳ {selectedPeriod} đã có chỉ số ({quantity(existingForPeriod.current_reading)} {currentMeter?.unit})
+                                    </div>
+                                    Để điều chỉnh chỉ số này, vui lòng sử dụng nút <strong>Sửa</strong> tại danh sách <em>Lịch sử ghi chỉ số</em> bên dưới.
+                                </div>
+                            ) : null}
+
+                            <label className="field">
+                                <span>Chỉ số hiện tại ({currentMeter?.unit || ''})</span>
+                                <input
+                                    type="number"
+                                    name="current_reading"
+                                    min={previousReading}
+                                    step="0.001"
+                                    placeholder={`Nhập >= ${previousReading}`}
+                                    disabled={Boolean(existingForPeriod)}
+                                    required
+                                />
+                            </label>
+
+                            <p className="help">
+                                Có thể nhập kỳ hiện tại hoặc kỳ quá khứ. Hệ thống lưu chỉ số và tính lượng dùng; chỉ tạo hóa đơn ước tính khi có biểu giá phù hợp đã cấu hình.
+                            </p>
+
+                            {saveError&&<div className="error" role="alert">{saveError}</div>}
+                            {saveNotice&&<p role="status" className="help">{saveNotice}</p>}
+                            <button
+                                type="submit"
+                                className="button"
+                                disabled={saveBusy||Boolean(existingForPeriod)}
+                                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                            >
+                                <Check size={17} /> {saveBusy?'Đang lưu…':'Lưu chỉ số'}
+                            </button>
+                        </form>
+                    )}
+                </Panel>
+
+                <div className="guidance">
+                    <span className="symbol"><Gauge size={28} /></span>
+                    <h2>Quản lý chỉ số &<br />Lịch sử ghi toàn diện</h2>
+                    <p>Hệ thống liên kết chỉ số kỳ trước và tính lượng tiêu thụ. Khi có biểu giá phù hợp đã cấu hình, hệ thống tạo thêm hóa đơn ước tính; thiếu biểu giá vẫn lưu được chỉ số.</p>
+                    <ol>
+                        <li><strong>Nhập kỳ bất kỳ:</strong> Bạn có thể bổ sung chỉ số các kỳ cũ hoặc nhập kỳ mới.</li>
+                        <li><strong>Chỉnh sửa & Xóa:</strong> Sửa sai sót hoặc xóa kỳ nhầm trực tiếp trong bảng lịch sử.</li>
+                        <li><strong>Tìm kiếm & Lọc:</strong> Dễ dàng tra cứu theo công tơ, năm và kỳ hóa đơn.</li>
+                    </ol>
+                    <p className="help">Mọi điều chỉnh chỉ số đều tự động cập nhật lại lượng tiêu hao và hóa đơn liên quan.</p>
+                </div>
+            </div>
+
+            {/* BẢNG LỊCH SỬ GHI CHỈ SỐ VỚI CRUD, PHÂN TRANG & BỘ LỌC */}
+            <Panel title="Lịch sử ghi chỉ số">
+                {/* TOOLBAR FILTER & SEARCH: 1 HÀNG EXECUTIVE TINH GỌN */}
+                <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '8px',
+                    marginBottom: '16px',
+                    padding: '8px 12px',
+                    background: '#ffffff',
+                    borderRadius: '14px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+                }}>
+                    {/* NHÓM CÁC CÔNG CỤ LỌC CHÍNH BÊN TRÁI */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flex: '1 1 auto' }}>
+                        {/* 1. Ô TÌM KIẾM THEO KỲ HOẶC GHI CHÚ */}
+                        <div style={{ position: 'relative', width: '180px', minWidth: '140px' }}>
+                            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                            <input
+                                type="text"
+                                placeholder="Tìm kỳ (VD: 2026-10)..."
+                                value={searchQuery}
+                                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                                style={{
+                                    width: '100%',
+                                    paddingLeft: '30px',
+                                    paddingRight: searchQuery ? '26px' : '8px',
+                                    height: '34px',
+                                    fontSize: '12.5px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #cbd5e1',
+                                    background: '#f8fafc',
+                                    color: '#0f172a',
+                                    outline: 'none'
+                                }}
+                            />
+                            {searchQuery && (
+                                <button
+                                    type="button"
+                                    onClick={() => { setSearchQuery(''); setCurrentPage(1); }}
+                                    style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8', padding: 0 }}
+                                    title="Xóa tìm kiếm"
+                                >
+                                    <X size={13} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* 2. SEGMENTED PILLS CHO LOẠI DỊCH VỤ (TẤT CẢ | ĐIỆN | NƯỚC) */}
+                        <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            background: '#f1f5f9',
+                            padding: '2px',
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                            gap: '2px'
+                        }}>
+                            <button
+                                type="button"
+                                onClick={() => { setFilterUtility('ALL'); setCurrentPage(1); }}
+                                style={{
+                                    border: 'none',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '11.5px',
+                                    fontWeight: filterUtility === 'ALL' ? 700 : 500,
+                                    cursor: 'pointer',
+                                    background: filterUtility === 'ALL' ? '#ffffff' : 'transparent',
+                                    color: filterUtility === 'ALL' ? '#0f172a' : '#64748b',
+                                    boxShadow: filterUtility === 'ALL' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                                    transition: 'all 0.15s ease'
+                                }}
+                            >
+                                Tất cả
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { setFilterUtility('ELECTRICITY'); setCurrentPage(1); }}
+                                style={{
+                                    border: 'none',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '11.5px',
+                                    fontWeight: filterUtility === 'ELECTRICITY' ? 700 : 500,
+                                    cursor: 'pointer',
+                                    background: filterUtility === 'ELECTRICITY' ? '#ffffff' : 'transparent',
+                                    color: filterUtility === 'ELECTRICITY' ? '#d97706' : '#64748b',
+                                    boxShadow: filterUtility === 'ELECTRICITY' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    transition: 'all 0.15s ease'
+                                }}
+                            >
+                                ⚡ Điện
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { setFilterUtility('WATER'); setCurrentPage(1); }}
+                                style={{
+                                    border: 'none',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '11.5px',
+                                    fontWeight: filterUtility === 'WATER' ? 700 : 500,
+                                    cursor: 'pointer',
+                                    background: filterUtility === 'WATER' ? '#ffffff' : 'transparent',
+                                    color: filterUtility === 'WATER' ? '#0284c7' : '#64748b',
+                                    boxShadow: filterUtility === 'WATER' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    transition: 'all 0.15s ease'
+                                }}
+                            >
+                                💧 Nước
+                            </button>
+                        </div>
+
+                        {/* 3. DROPDOWN CÔNG TƠ (WIDTH AUTO CO GIÃN) */}
+                        <select
+                            value={filterMeter}
+                            onChange={(e) => { setFilterMeter(e.target.value); setCurrentPage(1); }}
+                            style={{
+                                width: 'auto',
+                                minWidth: '130px',
+                                maxWidth: '170px',
+                                height: '34px',
+                                fontSize: '12px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                padding: '0 8px',
+                                background: '#ffffff',
+                                color: '#334155',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <option value="ALL">Tất cả công tơ</option>
+                            {activeMeters.map((m: Row) => (
+                                <option key={m.id} value={m.id}>{m.name} ({m.unit})</option>
+                            ))}
+                        </select>
+
+                        {/* 4. DROPDOWN NĂM (NẾU CÓ DỮ LIỆU) */}
+                        {availableYears.length > 0 && (
+                            <select
+                                value={filterYear}
+                                onChange={(e) => { setFilterYear(e.target.value); setCurrentPage(1); }}
+                                style={{
+                                    width: 'auto',
+                                    minWidth: '100px',
+                                    maxWidth: '125px',
+                                    height: '34px',
+                                    fontSize: '12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #cbd5e1',
+                                    padding: '0 8px',
+                                    background: '#ffffff',
+                                    color: '#334155',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <option value="ALL">Tất cả các năm</option>
+                                {availableYears.map((yr) => (
+                                    <option key={yr} value={yr}>Năm {yr}</option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
+
+                    {/* CỤM BÊN PHẢI: BADGE ĐẾM KẾT QUẢ & NÚT RESET */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                        <span style={{
+                            fontSize: '11.5px',
+                            color: '#64748b',
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            padding: '4px 8px',
+                            borderRadius: '7px',
+                            fontWeight: 500,
+                            whiteSpace: 'nowrap'
+                        }}>
+                            {filteredHistory.length} bản ghi
+                        </span>
+
+                        {(searchQuery || filterMeter !== 'ALL' || filterUtility !== 'ALL' || filterYear !== 'ALL') && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setFilterMeter('ALL');
+                                    setFilterUtility('ALL');
+                                    setFilterYear('ALL');
+                                    setCurrentPage(1);
+                                }}
+                                className="button small secondary"
+                                style={{
+                                    height: '32px',
+                                    padding: '0 10px',
+                                    fontSize: '11.5px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    borderRadius: '7px',
+                                    border: '1px solid #cbd5e1',
+                                    whiteSpace: 'nowrap'
+                                }}
+                                title="Đặt lại bộ lọc về mặc định"
+                            >
+                                <RotateCcw size={12} /> Đặt lại
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* TABLE */}
+                {paginatedHistory.length > 0 ? (
+                    <div className="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Kỳ hóa đơn</th>
+                                    <th>Công tơ / Loại</th>
+                                    <th>Chỉ số trước</th>
+                                    <th>Chỉ số mới</th>
+                                    <th>Tiêu thụ</th>
+                                    <th>Nguồn</th>
+                                    <th style={{ textAlign: 'center', width: '130px' }}>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {paginatedHistory.map((r: Row) => (
+                                    <tr key={r.id}>
+                                        <td>
+                                            <strong style={{ fontSize: '14px', color: '#0f172a' }}>{r.period}</strong>
+                                            <small style={{ display: 'block', color: '#94a3b8' }}>
+                                                {r.reading_date ? new Date(r.reading_date).toLocaleDateString('vi-VN') : ''}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span style={{
+                                                    width: '28px',
+                                                    height: '28px',
+                                                    borderRadius: '8px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    background: r.utility_type === 'ELECTRICITY' ? '#fef3c7' : '#e0f2fe',
+                                                    color: r.utility_type === 'ELECTRICITY' ? '#d97706' : '#0284c7'
+                                                }}>
+                                                    {r.utility_type === 'ELECTRICITY' ? <Zap size={16} /> : <Droplets size={16} />}
+                                                </span>
+                                                <div>
+                                                    <span style={{ fontWeight: 600, fontSize: '13px' }}>{r.meter_name || (r.utility_type === 'ELECTRICITY' ? 'Công tơ điện' : 'Đồng hồ nước')}</span>
+                                                    <small style={{ display: 'block', color: '#64748b' }}>{r.unit}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{quantity(r.previous_reading)}</td>
+                                        <td><strong style={{ color: '#2563eb' }}>{quantity(r.current_reading)}</strong></td>
+                                        <td><strong>{quantity(r.consumption)} {r.unit}</strong></td>
+                                        <td>
+                                            <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
+                                                {r.source === 'MANUAL' ? 'Nhập tay' : r.source === 'OCR' ? 'Quét ảnh / AI' : r.source}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                <button
+                                                    onClick={() => { setEditingReading(r); setEditError(''); }}
+                                                    title="Chỉnh sửa chỉ số"
+                                                    style={{
+                                                        padding: '6px 10px',
+                                                        borderRadius: '8px',
+                                                        background: '#eff6ff',
+                                                        color: '#2563eb',
+                                                        border: '1px solid #bfdbfe',
+                                                        cursor: 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        fontSize: '12px',
+                                                        fontWeight: 600
+                                                    }}
+                                                >
+                                                    <Pencil size={13} /> Sửa
+                                                </button>
+                                                <button
+                                                    onClick={() => { setDeletingReading(r); setDeleteError(''); }}
+                                                    title="Xóa chỉ số"
+                                                    style={{
+                                                        padding: '6px 8px',
+                                                        borderRadius: '8px',
+                                                        background: '#fef2f2',
+                                                        color: '#dc2626',
+                                                        border: '1px solid #fecaca',
+                                                        cursor: 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        fontSize: '12px'
+                                                    }}
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <Empty>
+                        {filteredHistory.length === 0 && allHistory.length > 0
+                            ? 'Không có chỉ số nào khớp với bộ lọc hiện tại.'
+                            : 'Chưa có bản ghi chỉ số nào.'}
+                    </Empty>
+                )}
+
+                {/* PAGINATION TOOLBAR */}
+                {filteredHistory.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', gap: '12px', fontSize: '13px', color: '#64748b' }}>
+                        <div>
+                            Hiển thị <strong>{Math.min((safeCurrentPage - 1) * pageSize + 1, filteredHistory.length)}</strong> - <strong>{Math.min(safeCurrentPage * pageSize, filteredHistory.length)}</strong> trong tổng số <strong>{filteredHistory.length}</strong> bản ghi
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span>Hiển thị:</span>
+                                <select
+                                    value={pageSize}
+                                    onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                                    style={{ height: '32px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 6px', fontSize: '12px', background: '#fff' }}
+                                >
+                                    <option value={5}>5 dòng</option>
+                                    <option value={10}>10 dòng</option>
+                                    <option value={20}>20 dòng</option>
+                                </select>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <button
+                                    disabled={safeCurrentPage <= 1}
+                                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                    className="button small secondary"
+                                    style={{ padding: '4px 10px', fontSize: '12px' }}
+                                >
+                                    « Trước
+                                </button>
+                                <span style={{ padding: '0 8px', fontWeight: 600, color: '#0f172a' }}>
+                                    {safeCurrentPage} / {totalPages}
+                                </span>
+                                <button
+                                    disabled={safeCurrentPage >= totalPages}
+                                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                    className="button small secondary"
+                                    style={{ padding: '4px 10px', fontSize: '12px' }}
+                                >
+                                    Sau »
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </Panel>
+
+            {/* MODAL CHỈNH SỬA CHỈ SỐ */}
+            {editingReading && (
+                <GlassModal
+                    isOpen={Boolean(editingReading)}
+                    onClose={() => setEditingReading(null)}
+                    title={`Chỉnh sửa chỉ số - Kỳ ${editingReading.period}`}
+                >
+                    <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                        <div style={{ display: 'flex', gap: '12px', background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '13px' }}>
+                            <div style={{ flex: 1 }}>
+                                <span style={{ color: '#64748b', display: 'block', fontSize: '12px' }}>Công tơ</span>
+                                <strong>{editingReading.meter_name || (editingReading.utility_type === 'ELECTRICITY' ? 'Công tơ điện' : 'Đồng hồ nước')}</strong>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <span style={{ color: '#64748b', display: 'block', fontSize: '12px' }}>Chỉ số kỳ trước</span>
+                                <strong>{quantity(editingReading.previous_reading)} {editingReading.unit}</strong>
+                            </div>
+                        </div>
+
+                        <label className="field">
+                            <span>Chỉ số mới ({editingReading.unit})</span>
+                            <input
+                                type="number"
+                                name="current_reading"
+                                step="0.001"
+                                min={editingReading.previous_reading}
+                                defaultValue={editingReading.current_reading}
+                                required
+                            />
+                        </label>
+
+                        <label className="field">
+                            <span>Ngày ghi nhận</span>
+                            <input
+                                type="date"
+                                name="reading_date"
+                                defaultValue={editingReading.reading_date}
+                                max={localDate()}
+                                required
+                            />
+                        </label>
+
+                        {editError && (
+                            <div className="error" style={{ margin: 0 }}>
+                                {editError}
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '10px' }}>
+                            <button
+                                type="button"
+                                className="button secondary"
+                                onClick={() => setEditingReading(null)}
+                                disabled={editBusy}
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button
+                                type="submit"
+                                className="button"
+                                disabled={editBusy}
+                            >
+                                {editBusy ? 'Đang lưu…' : 'Lưu thay đổi'}
+                            </button>
+                        </div>
+                    </form>
+                </GlassModal>
+            )}
+
+            {/* MODAL XÁC NHẬN XÓA CHỈ SỐ */}
+            {deletingReading && (
+                <GlassModal
+                    isOpen={Boolean(deletingReading)}
+                    onClose={() => setDeletingReading(null)}
+                    title="Xác nhận xóa chỉ số"
+                    maxWidth="sm"
+                >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fee2e2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <AlertTriangle size={20} />
+                            </div>
+                            <div style={{ fontSize: '13.5px', color: '#334155', lineHeight: 1.5 }}>
+                                Bạn có chắc chắn muốn xóa bản ghi chỉ số kỳ <strong>{deletingReading.period}</strong> (Chỉ số: <strong>{quantity(deletingReading.current_reading)} {deletingReading.unit}</strong>) không?
+                                <p style={{ margin: '6px 0 0 0', color: '#dc2626', fontSize: '12px' }}>
+                                    Hóa đơn ước tính của kỳ này sẽ được dọn dẹp. Nếu có kỳ liền sau, chỉ số trước của kỳ sau sẽ tự động được nối tiếp.
+                                </p>
+                            </div>
+                        </div>
+
+                        {deleteError && (
+                            <div className="error" style={{ margin: 0 }}>
+                                {deleteError}
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                            <button
+                                type="button"
+                                className="button secondary"
+                                onClick={() => setDeletingReading(null)}
+                                disabled={deleteBusy}
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                disabled={deleteBusy}
+                                style={{ background: '#dc2626', color: '#fff', border: 'none', borderRadius: '12px', padding: '10px 18px', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                {deleteBusy ? 'Đang xóa…' : 'Xác nhận xóa'}
+                            </button>
+                        </div>
+                    </div>
+                </GlassModal>
+            )}
+        </>
+    );
+}
+function Bills({notify}:{notify:(message?:string)=>void}) {
+    const [generating,setGenerating]=useState(false),[generationMessage,setGenerationMessage]=useState(''),[generationError,setGenerationError]=useState('');
+    const [period, setPeriod] = useState('');
+    const [status, setStatus] = useState('');
+    const [utility, setUtility] = useState('');
+    const { data, error, loading } = useData(['/bills']);
+
+    if (error) return <LoadState error={error} loading={false} />;
+    const billsList = data && data[0] ? data[0] : [];
+    async function generate(){setGenerating(true);setGenerationError('');setGenerationMessage('');try{const result=await api('/bills/generate','POST',{},true,20000);invalidateCache();const message=`Đã tạo ${result.created.length} hóa đơn. ${result.skipped.length?result.skipped.map((item:Row)=>`Kỳ ${item.period} (${item.provider}): ${item.message}`).join(' '):'Các kỳ đã có hóa đơn được giữ nguyên.'}`;setGenerationMessage(message);notify(message);}catch(e:any){setGenerationError(e.message);notify(e.message);}finally{setGenerating(false);}}
+
+    return (
+        <Panel>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4"><p>Hóa đơn ước tính từ chỉ số và biểu giá phù hợp, chưa gồm thuế/phí.</p><button className="button" disabled={generating} onClick={generate}>{generating?'Đang tính…':'Tính hóa đơn từ chỉ số'}</button></div>
+            {generationMessage&&<p role="status" className="help">{generationMessage}</p>}{generationError&&<p role="alert" className="error">{generationError}</p>}
+            <div className="filters">
+                <Field label="Kỳ" name="period" type="month" value="" required={false} onChange={(e: any) => setPeriod(e.target.value)} />
+                <Select label="Trạng thái" onChange={(e: any) => setStatus(e.target.value)}>
+                    <option value="">Tất cả</option>
+                    {Object.entries(statusNames).map(([k, v]) => <option key={k} value={k}>{String(v)}</option>)}
+                </Select>
+                <Select label="Tiện ích" onChange={(e: any) => setUtility(e.target.value)}>
+                    <option value="">Điện và nước</option>
+                    <option value="ELECTRICITY">Điện</option>
+                    <option value="WATER">Nước</option>
+                </Select>
+            </div>
+            {loading && !billsList.length ? (
+                <LoadState error="" loading={true} />
+            ) : (
+                <BillTable bills={billsList.filter((b: Row) => (!period || b.period === period) && (!status || b.status === status) && (!utility || b.utility_type === utility))} />
+            )}
+        </Panel>
+    );
+}
+
+function BillDetail({ id, notify }: { id: string; notify: (s?: string) => void }) {
+    const { data, error, loading } = useData(['/bills/' + id]);
+    if (error || (loading && (!data || !data[0]))) return <LoadState error={error} loading={loading} />;
+    const b = data[0];
+    const detail = b.bill_detail_snapshot;
+
+    return (
+        <Panel>
+            <div className="bill-detail-head">
+                <div>
+                    <span className="eyebrow">HÓA ĐƠN ƯỚC TÍNH</span>
+                    <h2>{b.bill_code}</h2>
+                    <p>Kỳ {b.period} · {b.utility_type === 'ELECTRICITY' ? 'Điện' : 'Nước'}</p>
+                </div>
+                <Badge status={b.status} />
+            </div>
+            <div className="bill-summary">
+                <div><span>Chỉ số trước</span><strong>{quantity(detail.previous_reading)}</strong></div>
+                <div><span>Chỉ số mới</span><strong>{quantity(detail.current_reading)}</strong></div>
+                <div><span>Tiêu thụ</span><strong>{quantity(b.consumption)} {b.utility_type === 'ELECTRICITY' ? 'kWh' : 'm³'}</strong></div>
+                <div><span>Hạn dự kiến</span><strong>{b.due_date}</strong></div>
+            </div>
+            <h3>Chi tiết biểu giá · {b.tariff_version_snapshot.version}</h3>
+            <DataTable rows={detail.tiers} columns={[{ title: 'Bậc', render: r => `${r.from} – ${r.to ?? 'trở lên'}` }, { title: 'Lượng dùng', render: r => quantity(r.quantity) }, { title: 'Đơn giá', render: r => money(r.unit_price) }, { title: 'Thành tiền', render: r => money(r.amount) }]} />
+            <div className="bill-totals">
+                <p>Ước tính <strong>{money(b.estimated_amount)}</strong></p>
+                <p>Số tiền chính thức <strong>{b.official_amount === null ? 'Chưa có' : money(b.official_amount)}</strong></p>
+                <h2>Tổng cộng <span>{money(b.final_amount)}</span></h2>
+            </div>
+            <p className="help">Nguồn hóa đơn: {b.source} · Nguồn chỉ số: {detail.reading_source}. {detail.tax_note} Ngày đến hạn theo cấu hình, chưa xác nhận từ nhà cung cấp.</p>
+            {b.tariff_version_snapshot?.source?.url&&<p className="help">Biểu giá: <a className="underline" href={b.tariff_version_snapshot.source.url} target="_blank" rel="noopener noreferrer">{b.tariff_version_snapshot.source.decision} · nguồn EVN</a>. Hiệu lực từ {b.tariff_version_snapshot.effective_from}.</p>}
+            <div className="actions">
+                {['UNPAID', 'OVERDUE'].includes(b.status) && (
+                    <Action label="Tôi đã thanh toán (ghi nhận thủ công)" run={() => api('/payments', 'POST', { bill_id: id })} done={() => notify('Đã ghi nhận thanh toán thủ công.')} />
+                )}
+                <button className="button secondary" onClick={() => window.print()}>
+                    <Download size={17} />In / Lưu PDF
+                </button>
+            </div>
+        </Panel>
+    );
+}
+
+function Statistics() {
+    const [months, setMonths] = useState('6');
+    const [start, setStart] = useState('');
+    const [end, setEnd] = useState('');
+    const custom = months === 'custom';
+    const query = custom && start && end ? `start=${start}&end=${end}` : `months=${custom ? '6' : months}`;
+    const { data, error, loading } = useData(['/statistics?' + query]);
+
+    return (
+        <>
+            <div className="filters">
+                <Select label="Khoảng thời gian" value={months} onChange={(e: any) => setMonths(e.target.value)}>
+                    <option value="3">3 tháng</option>
+                    <option value="6">6 tháng</option>
+                    <option value="12">12 tháng</option>
+                    <option value="custom">Tùy chọn</option>
+                </Select>
+                {custom && (
+                    <>
+                        <Field label="Từ ngày" type="date" required={false} onChange={(e: any) => setStart(e.target.value)} />
+                        <Field label="Đến ngày" type="date" required={false} onChange={(e: any) => setEnd(e.target.value)} />
+                    </>
+                )}
+            </div>
+            {error || (loading && (!data || !data[0])) ? (
+                <LoadState error={error} loading={loading} />
+            ) : (
+                <>
+                    <div className="metric-grid">
+                        {['ELECTRICITY', 'WATER', 'cost'].map((k, i) => (
+                            <Panel title={['Điện · kWh', 'Nước · m³', 'Chi phí · VND'][i]} key={k}>
+                                <div className="stat-value">{data[0].summary[k].average === null ? '—' : i === 2 ? money(data[0].summary[k].average) : quantity(data[0].summary[k].average)}</div>
+                                <p className="muted">Trung bình các kỳ đã nhập</p>
+                                <div className="stat-range">
+                                    <span>Thấp nhất <strong>{data[0].summary[k].lowest === null ? '—' : quantity(data[0].summary[k].lowest)}</strong></span>
+                                    <span>Cao nhất <strong>{data[0].summary[k].highest === null ? '—' : quantity(data[0].summary[k].highest)}</strong></span>
+                                </div>
+                            </Panel>
+                        ))}
+                    </div>
+                    <Panel title="Điện và nước theo kỳ"><UsageChart data={data[0].series} /></Panel>
+                    <Panel title="Chi phí theo kỳ"><UsageChart data={data[0].series} cost /></Panel>
+                    <Panel title="Dữ liệu chi tiết">
+                        <DataTable rows={data[0].series} columns={[{ title: 'Kỳ', render: r => r.period }, { title: 'Điện (kWh)', render: r => quantity(r.ELECTRICITY) }, { title: 'Nước (m³)', render: r => quantity(r.WATER) }, { title: 'Chi phí', render: r => money(r.cost) }]} />
+                        <p className="help">{data[0].note}</p>
+                    </Panel>
+                </>
+            )}
+        </>
+    );
+}
+
+function HouseholdPage({ notify }: { notify: (s?: string) => void }) { const { data, error, loading } = useData(['/households/current', '/households', '/utility-accounts']); if (error || (loading && (!data || !data[0]))) return <LoadState error={error} loading={loading} />; const [h, houses, accounts] = data; return <><div className="two-columns"><Panel title="Thông tin hộ" action={<Link href="/household/members" className="subtle-link">Thành viên <Users size={17} /></Link>}><SaveForm submit={async values => { await api('/households/current', 'PATCH', { ...values, member_count: Number(values.member_count) }); notify() }}><Field label="Tên hộ" name="name" value={h.name} /><Field label="Địa chỉ" name="address" value={h.address} /><div className="form-grid"><Field label="Tỉnh / thành phố" name="province" value={h.province} required={false} /><Field label="Quận / huyện" name="district" value={h.district} required={false} /><Field label="Phường / xã" name="ward" value={h.ward} required={false} /><Field label="Số thành viên" name="member_count" type="number" min={1} max={100} value={h.member_count} /></div></SaveForm></Panel><Panel title="Không gian gia đình">{houses.map((house: Row) => <div className="house-choice" key={house.id}><House size={23} /><strong>{house.name}</strong>{house.id === h.id ? <Badge status="Đang chọn" /> : <Action label="Chuyển hộ" run={() => api('/households/' + house.id + '/select', 'POST')} done={() => notify('Đã chuyển hộ.')} />}</div>)}<Link href="/onboarding" className="button secondary"><Plus size={16} />Thêm hộ gia đình</Link></Panel></div>{accounts.map((a: Row) => <Panel key={a.id} title={a.utility_type === 'ELECTRICITY' ? 'Tài khoản điện' : 'Tài khoản nước'}><SaveForm submit={async values => { await api('/utility-accounts/' + a.id, 'PATCH', { ...values, utility_type: a.utility_type, billing_day: Number(values.billing_day), due_day: Number(values.due_day), reminder_days_before: Number(values.reminder_days_before) }); notify() }}><div className="form-grid"><Field label="Nhà cung cấp" name="provider_name" value={a.provider_name} /><Select label="Loại biểu giá / Công tơ" name="tariff_category" defaultValue={a.tariff_category || (a.utility_type === 'ELECTRICITY' ? 'RESIDENTIAL_1PHASE' : 'RESIDENTIAL')}>{a.utility_type === 'ELECTRICITY' ? <><option value="RESIDENTIAL_1PHASE">Điện 1 pha sinh hoạt (6 bậc EVN)</option><option value="RESIDENTIAL_3PHASE">Điện 3 pha sinh hoạt</option><option value="COMMERCIAL">Điện kinh doanh / Dịch vụ</option><option value="INDUSTRIAL">Điện sản xuất</option></> : <><option value="RESIDENTIAL">Nước sinh hoạt</option><option value="COMMERCIAL">Nước kinh doanh</option><option value="INDUSTRIAL">Nước sản xuất</option></>}</Select><Field label="Tỉnh / Thành phố" name="province" value={a.province} required={false} placeholder="Ví dụ: TP. Hồ Chí Minh" /><Field label="Mã khách hàng" name="customer_code" value={a.customer_code} required={false} /><Field label="Ngày có hóa đơn" type="number" name="billing_day" value={a.billing_day} min={1} max={31} /><Field label="Ngày thanh toán dự kiến" type="number" name="due_day" value={a.due_day} min={1} max={31} /><Field label="Nhắc trước (ngày)" type="number" name="reminder_days_before" value={a.reminder_days_before} min={0} max={14} /></div></SaveForm></Panel>)}</> }
+function Members({ notify }: { notify: (s?: string) => void }) { const { data, error, loading } = useData(['/members']); return <div className="two-columns"><Panel title="Thành viên trong hộ">{error || (loading && (!data || !data[0])) ? <LoadState error={error} loading={loading} /> : <DataTable rows={data[0]} columns={[{ title: 'Họ tên', render: r => <div><strong>{r.full_name}</strong><small>{r.email}</small></div> }, { title: 'Quyền', render: r => r.role === 'OWNER' ? 'Chủ hộ' : r.permissions.join(', ') || 'Chỉ xem' }, { title: 'Thao tác', render: r => r.role !== 'OWNER' && <Action label="Xóa khỏi hộ" run={() => api('/members/' + r.id, 'DELETE')} done={() => notify()} /> }]} />}</Panel><Panel title="Thêm thành viên"><SaveForm label="Thêm thành viên" submit={async values => { await api('/members', 'POST', { email: values.email, permissions: values.permission === 'write' ? ['write'] : values.permission === 'pay' ? ['pay'] : [] }); notify() }}><Field label="Email đã đăng ký" name="email" type="email" /><Select label="Quyền thành viên" name="permission"><option value="read">Chỉ xem</option><option value="write">Nhập chỉ số và quản lý công tơ</option><option value="pay">Ghi nhận thanh toán</option></Select><p className="help">Người được thêm cần có tài khoản trước. Quyền được kiểm tra tại máy chủ.</p></SaveForm></Panel></div> }
+function Meters({ notify }: { notify: (s?: string) => void }) { const { data, error, loading } = useData(['/meters', '/utility-accounts']); const [edit, setEdit] = useState<Row | null>(null); if (error || (loading && (!data || !data[0]))) return <LoadState error={error} loading={loading} />; return <div className="two-columns"><Panel title="Danh sách công tơ">{data[0].map((m: Row) => <div className="meter-card" key={m.id}><span className={'utility-icon ' + m.utility_type.toLowerCase()}>{m.utility_type === 'ELECTRICITY' ? <Zap /> : <Droplets />}</span><div><h3>{m.name}</h3><p>{m.meter_code || 'Chưa có mã'} · Ban đầu: {quantity(m.initial_reading)} {m.unit}</p><Badge status={m.is_active ? 'Hoạt động' : 'Đã ngừng'} /></div><button className="text-button" onClick={() => setEdit(m)}>Sửa</button></div>)}</Panel><Panel title={edit ? 'Sửa công tơ' : 'Thêm công tơ'}><SaveForm key={edit?.id || 'new'} submit={async values => { if (edit) { await api('/meters/' + edit.id, 'PATCH', { ...values, is_active: values.is_active === 'true' }); setEdit(null) } else await api('/meters', 'POST', values); notify() }}><Field label="Tên công tơ" name="name" value={edit?.name} /><Field label="Mã công tơ" name="meter_code" value={edit?.meter_code} required={false} />{edit ? <Select label="Trạng thái" name="is_active" defaultValue={String(edit.is_active)}><option value="true">Hoạt động</option><option value="false">Ngừng hoạt động</option></Select> : <><Select label="Tài khoản" name="utility_account_id">{data[1].map((a: Row) => <option key={a.id} value={a.id}>{a.provider_name} · {a.utility_type === 'ELECTRICITY' ? 'Điện' : 'Nước'}</option>)}</Select><Field label="Chỉ số ban đầu" name="initial_reading" type="number" min={0} value={0} step="0.001" /></>}<p className="help">Mỗi tài khoản dùng một công tơ hoạt động trong V1.</p></SaveForm>{edit && <button className="text-button" onClick={() => setEdit(null)}>Hủy chỉnh sửa</button>}</Panel></div> }
 function SettingsPage({ user, notify }: { user: Row; notify: (s?: string) => void }) { const router = useRouter(); return <div className="two-columns"><Panel title="Thông tin cá nhân"><SaveForm submit={async v => { await api('/auth/me', 'PATCH', v); notify() }}><Field label="Họ tên" name="full_name" value={user.full_name} /><p className="muted">Email: {user.email}</p></SaveForm></Panel><Panel title="Đổi mật khẩu"><SaveForm submit={async v => { await api('/auth/password', 'POST', v); setToken(null); router.push('/login') }}><Field label="Mật khẩu hiện tại" name="old_password" type="password" autoComplete="current-password" /><Field label="Mật khẩu mới" name="new_password" type="password" minLength={10} maxLength={128} autoComplete="new-password" /><p className="help">Sau khi đổi mật khẩu, tất cả phiên sẽ đăng xuất.</p></SaveForm></Panel></div> }
-function Assistant() {
-    const [messages, setMessages] = useState<Row[]>([]);
+function Assistant({ user }: { user?: Row | null }) {
+    const [messages, setMessages] = useState<Row[]>(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const saved = localStorage.getItem(chatStorageKey(user?.id || '', user?.household_id || ''));
+                if (saved) return JSON.parse(saved);
+            } catch { }
+        }
+        return [];
+    });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                if (messages.length > 0) {
+                    localStorage.setItem(chatStorageKey(user?.id || '', user?.household_id || ''), JSON.stringify(persistableMessages(messages)));
+                } else {
+                    localStorage.removeItem(chatStorageKey(user?.id || '', user?.household_id || ''));
+                }
+            } catch { }
+        }
+    }, [messages, user?.id, user?.household_id]);
     const [input, setInput] = useState('');
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
-    const [thinkingStep, setThinkingStep] = useState(1);
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+    const [cooldown,setCooldown]=useState(0);
+    const sendingRef=useRef(false);
+    useEffect(()=>{if(cooldown<=0)return;const timer=setTimeout(()=>setCooldown(v=>Math.max(0,v-1)),1000);return()=>clearTimeout(timer);},[cooldown]);
+    const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+    const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null);
+    const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Multi-stage thinking animation simulator
+    // Auto-scroll to bottom of chat area when messages update or when busy
     useEffect(() => {
-        if (!busy) {
-            setThinkingStep(1);
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages, busy]);
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (fileInputRef.current) fileInputRef.current.value = '';
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            setError('Định dạng ảnh không được hỗ trợ. Vui lòng chọn ảnh JPG, PNG hoặc WebP.');
             return;
         }
-        const timer1 = setTimeout(() => setThinkingStep(2), 1200);
-        const timer2 = setTimeout(() => setThinkingStep(3), 2600);
-        return () => {
-            clearTimeout(timer1);
-            clearTimeout(timer2);
-        };
-    }, [busy]);
 
-    async function send(message: string) {
-        if (!message.trim() || busy) return;
-        setInput('');
+        const maxSizeBytes = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSizeBytes) {
+            setError('Ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn 10 MB.');
+            return;
+        }
+
         setError('');
-        setMessages(m => [...m, { role: 'user', message }]);
+        setSelectedImageFile(file);
+
+        const previewUrl = URL.createObjectURL(file);
+        setSelectedImagePreview(previewUrl);
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const base64Str = event.target?.result as string;
+            setSelectedImageBase64(base64Str);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const clearSelectedImage = (revoke = true) => {
+        if (revoke && selectedImagePreview) URL.revokeObjectURL(selectedImagePreview);
+        setSelectedImageFile(null);
+        setSelectedImageBase64(null);
+        setSelectedImagePreview(null);
+    };
+
+    async function send(messageToSend?: string) {
+        const textMsg = messageToSend !== undefined ? messageToSend : input;
+        const hasText = Boolean(textMsg && textMsg.trim());
+        const hasImg = Boolean(selectedImageBase64);
+
+        if ((!hasText && !hasImg) || busy || sendingRef.current || cooldown>0) return;
+        sendingRef.current=true;
+
+        const currentPreview = selectedImagePreview;
+        const currentBase64 = selectedImageBase64;
+        const currentText = textMsg.trim();
+
+        setInput('');
+        clearSelectedImage(false);
+        setError('');
+
+        const userMsgObj: Row = {
+            role: 'user',
+            message: currentText || 'Phân tích hóa đơn này',
+            imagePreview: currentBase64 || currentPreview || undefined
+        };
+
+        setMessages(m => [...m, userMsgObj]);
         setBusy(true);
+
         try {
-            const result = await api('/ai/chat', 'POST', { message });
+            const payload = {
+                message: currentText,
+                image_base64: currentBase64,
+                raw_ocr_text: null,
+                conversation_id: [...messages].reverse().find(m => m.role === 'assistant' && m.metadata?.conversation_id)?.metadata.conversation_id || null
+            };
+            // Service errors are displayed separately; only Gemini supplies assistant answers.
+            const result = await api('/ai/chat', 'POST', payload, true, 40000);
             setMessages(m => [...m, { role: 'assistant', ...result }]);
         } catch (e: any) {
-            setError(e.message);
+            // Keep the failure in the conversation so the user's message is not left unanswered.
+            if(Number.isFinite(e.retryAfter)&&e.retryAfter>0)setCooldown(Math.ceil(e.retryAfter));
+            setMessages(m => [...m, { role: 'assistant', message: e.message, metadata: { failed: true } }]);
         } finally {
+            sendingRef.current=false;
             setBusy(false);
         }
     }
@@ -1156,7 +2075,7 @@ function Assistant() {
         { cat: '⚡ Tra cứu Điện', query: 'Tháng này tôi đã dùng bao nhiêu kWh điện?', icon: Zap, color: 'electric' },
         { cat: '💧 Tra cứu Nước', query: 'So sánh hóa đơn nước 3 tháng gần nhất.', icon: Droplets, color: 'water' },
         { cat: '🔮 Dự báo AI', query: 'Ước tính tiền điện & nước tháng tới là bao nhiêu?', icon: Sparkles, color: 'purple' },
-        { cat: '🌱 Tiết kiệm', query: 'Tôi có thể tiết kiệm 15% chi phí điện như thế nào?', icon: Leaf, color: 'green' },
+        { cat: '🌱 Tiết kiệm', query: 'Dựa trên dữ liệu đã ghi, tôi nên theo dõi gì để tiết kiệm điện?', icon: Leaf, color: 'green' },
         { cat: '🧾 Trạng thái', query: 'Hóa đơn nào của tôi đang chờ thanh toán?', icon: ReceiptText, color: 'amber' },
     ];
 
@@ -1173,22 +2092,39 @@ function Assistant() {
                     <div className="ai-header-info">
                         <div className="ai-title-row">
                             <h2>Trợ Lý Nhà Mình AI</h2>
-                            <span className="model-badge">Gemini 1.5 Pro</span>
+                            <span className="model-badge">AI Trợ Lý</span>
                         </div>
                         <p>Dữ liệu gia đình thời gian thực · Tự động gợi ý & phân tích biểu giá</p>
                     </div>
                     
-                    <div className="ai-header-actions">
+                    <div className="ai-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span className="online-pill">
                             <span className="pulse-dot" /> Sẵn sàng
                         </span>
                         {messages.length > 0 && (
                             <button 
-                                className="icon-btn-subtle" 
-                                onClick={() => setMessages([])}
-                                title="Xóa cuộc trò chuyện"
+                                className="button small secondary"
+                                style={{
+                                    height: '30px',
+                                    padding: '0 10px',
+                                    fontSize: '11.5px',
+                                    borderRadius: '7px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    border: '1px solid #cbd5e1'
+                                }}
+                                onClick={() => {
+                                    setMessages([]);
+                                    if (typeof window !== 'undefined') {
+                                        try {
+                                            localStorage.removeItem(chatStorageKey(user?.id || '', user?.household_id || ''));
+                                        } catch { }
+                                    }
+                                }}
+                                title="Bắt đầu cuộc trò chuyện mới"
                             >
-                                <Trash2 size={16} />
+                                <RotateCcw size={12} /> Cuộc trò chuyện mới
                             </button>
                         )}
                     </div>
@@ -1243,12 +2179,18 @@ function Assistant() {
 
                                 <div className="bubble-wrap">
                                     <div className="bubble-header">
-                                        <span className="sender-name">{m.role === 'assistant' ? 'Trợ lý AI' : 'Bạn'}</span>
+                                        <span className="sender-name">{m.metadata?.failed?'Gemini chưa trả lời':m.role === 'assistant' ? 'Trợ lý AI' : 'Bạn'}</span>
                                         <span className="timestamp">{new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
 
                                     <div className="bubble-content">
-                                        <ChatAnswer answer={m as { message: string }} />
+                                        {m.imagePreview && (
+                                            <div className="mb-3 overflow-hidden rounded-xl border border-white/30 bg-slate-900/20 backdrop-blur-xs p-1 max-w-sm shadow-md">
+                                                <img src={m.imagePreview} alt="Ảnh hóa đơn đính kèm" className="max-h-60 w-full object-contain rounded-lg" />
+                                            </div>
+                                        )}
+                                        {m.metadata?.failed?<p role="alert" className="text-red-700">{m.message}</p>:<ChatAnswer answer={m as { message: string }} />}
+                                        {m.role === 'assistant' && <InvoiceResultDetails result={m.metadata?.result} />}
                                     </div>
 
                                     {m.role === 'assistant' && (
@@ -1285,7 +2227,7 @@ function Assistant() {
                                     </div>
                                     <div className="thinking-title">
                                         <strong>AI đang suy nghĩ và chuẩn bị câu trả lời...</strong>
-                                        <span className="thinking-subtitle">Mô hình Gemini 1.5 đang xử lý dữ liệu gia đình</span>
+                                        <span className="thinking-subtitle">Hệ thống AI đang xử lý và phân tích dữ liệu gia đình</span>
                                     </div>
                                 </div>
 
@@ -1298,37 +2240,63 @@ function Assistant() {
                                     <span className="bar b5" />
                                 </div>
 
-                                {/* MULTI-STEP PROGRESSION INDICATOR */}
-                                <div className="thinking-steps">
-                                    <div className={`step-item ${thinkingStep >= 1 ? 'active' : ''}`}>
-                                        <Zap size={14} className="step-icon" />
-                                        <span>1. Đang truy vấn lịch sử chỉ số công tơ & hóa đơn...</span>
-                                    </div>
-                                    <div className={`step-item ${thinkingStep >= 2 ? 'active' : ''}`}>
-                                        <Cpu size={14} className="step-icon" />
-                                        <span>2. Đang phân tích quy luật tiêu thụ & so sánh bậc giá...</span>
-                                    </div>
-                                    <div className={`step-item ${thinkingStep >= 3 ? 'active' : ''}`}>
-                                        <Sparkles size={14} className="step-icon" />
-                                        <span>3. Đang tạo báo cáo khuyến nghị tiết kiệm tối ưu...</span>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     )}
+                    <div ref={messagesEndRef} />
                 </div>
 
                 {error && <div className="error-alert" role="alert"><AlertTriangle size={16} />{error}</div>}
 
+                {/* ATTACHMENT PREVIEW IF SELECTED */}
+                {selectedImagePreview && (
+                    <div className="flex items-center gap-3 p-2.5 px-3 mb-2 rounded-2xl bg-white/70 backdrop-blur-md border border-slate-200/80 shadow-xs max-w-md mx-4">
+                        <img src={selectedImagePreview} alt="Preview" className="w-12 h-12 rounded-xl object-cover border border-slate-200" />
+                        <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-slate-800 truncate">{selectedImageFile?.name || 'Hoa_don.jpg'}</p>
+                            <span className="text-[10px] text-slate-500 font-medium">
+                                {selectedImageFile ? (selectedImageFile.size / 1024).toFixed(0) : 0} KB
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            aria-label="Xóa ảnh đã chọn"
+                            onClick={() => clearSelectedImage()}
+                            className="p-1.5 rounded-full hover:bg-slate-200/60 text-slate-500 hover:text-slate-800 transition-colors"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                )}
+
+                {/* HIDDEN FILE INPUT */}
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                />
+
                 {/* COMPOSER INPUT BAR */}
-                <form className="ai-composer-bar" onSubmit={e => { e.preventDefault(); send(input); }}>
+                <form className="ai-composer-bar" onSubmit={e => { e.preventDefault(); send(); }}>
                     <div className="composer-input-wrapper">
+                        <button
+                            type="button"
+                            className="tool-btn mr-1"
+                            aria-label="Đính kèm ảnh"
+                            title="Đính kèm ảnh hóa đơn"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <Paperclip size={18} />
+                        </button>
+
                         <input 
                             aria-label="Câu hỏi cho trợ lý" 
                             value={input} 
                             maxLength={2000} 
                             onChange={e => setInput(e.target.value)} 
-                            placeholder="Hỏi bất kỳ điều gì về điện, nước hoặc mẹo tiết kiệm…" 
+                            placeholder={selectedImageBase64 ? "Nhập câu hỏi kèm ảnh hoặc bấm Gửi ngay…" : "Hỏi bất kỳ điều gì hoặc đính kèm ảnh hóa đơn…"}
                         />
                         
                         <div className="composer-tools">
@@ -1338,10 +2306,10 @@ function Assistant() {
                             <button 
                                 type="submit" 
                                 className="btn-send-ai"
-                                disabled={busy || !input.trim()}
+                                disabled={busy || cooldown>0 || (!input.trim() && !selectedImageBase64)}
                                 aria-label="Gửi câu hỏi"
                             >
-                                <span>Gửi</span>
+                                <span>{cooldown>0?`Chờ ${cooldown}s`:'Gửi'}</span>
                                 <Send size={16} />
                             </button>
                         </div>
@@ -1356,21 +2324,19 @@ function Assistant() {
                 <div className="sidebar-card live-status">
                     <div className="card-head">
                         <House size={18} className="text-blue" />
-                        <h3>Trạng thái Kỳ Hiện Tại</h3>
+                        <h3>Dữ liệu đã ghi</h3>
                     </div>
                     <div className="status-metrics-grid">
                         <div className="sm-chip electric">
                             <Zap size={15} />
                             <div>
-                                <span>Điện T12</span>
-                                <strong>428.000 ₫</strong>
+                                <Link href="/readings">Xem chỉ số</Link>
                             </div>
                         </div>
                         <div className="sm-chip water">
                             <Droplets size={15} />
                             <div>
-                                <span>Nước T12</span>
-                                <strong>86.000 ₫</strong>
+                                <Link href="/bills">Xem hóa đơn</Link>
                             </div>
                         </div>
                     </div>
@@ -1379,10 +2345,10 @@ function Assistant() {
                 <div className="sidebar-card ai-tip">
                     <div className="card-head">
                         <Lightbulb size={18} className="text-yellow" />
-                        <h3>Mẹo Hay Từ AI</h3>
+                        <h3>Đọc hóa đơn từ ảnh</h3>
                     </div>
                     <p className="tip-text">
-                        "Giảm nhiệt độ máy nước nóng bớt 2°C có thể giúp tiết kiệm khoảng 45.000 ₫ mỗi tháng."
+                        Gửi ảnh hóa đơn kèm điều bạn muốn biết. Bạn có thể xem lại các trường đọc được trong phần chi tiết của câu trả lời.
                     </p>
                 </div>
 
@@ -1392,10 +2358,10 @@ function Assistant() {
                         <h3>Khả Năng Của Trợ Lý</h3>
                     </div>
                     <ul className="cap-list">
-                        <li>✓ Phân tích bậc giá EVN & Sawaco</li>
-                        <li>✓ Phát hiện dòng điện rò rỉ bất thường</li>
-                        <li>✓ Ước tính hóa đơn cuối tháng</li>
-                        <li>✓ Lập kế hoạch tiết kiệm năng lượng</li>
+                        <li>Đọc thông tin hóa đơn điện, nước</li>
+                        <li>Đối chiếu tài khoản và kỳ đã ghi</li>
+                        <li>Phân tích dữ liệu tiêu thụ có sẵn</li>
+                        <li>Hỏi thêm khi chưa đủ căn cứ</li>
                     </ul>
                 </div>
             </div>
@@ -1404,6 +2370,10 @@ function Assistant() {
 }
 
 function AdminPage({ screen, notify }: { screen: string; notify: (s?: string) => void }) {
+    if (screen === 'admin/knowledge') return <KnowledgeAdmin />;
+    return <AdminOverview screen={screen} notify={notify} />;
+}
+function AdminOverview({ screen, notify }: { screen: string; notify: (s?: string) => void }) {
     const endpoint = screen === 'admin' ? '/admin' : screen === 'admin/users' ? '/admin/users' : screen === 'admin/audit' ? '/admin/audit' : '/tariffs';
     const { data, error, loading } = useData([endpoint]);
 
@@ -1411,7 +2381,8 @@ function AdminPage({ screen, notify }: { screen: string; notify: (s?: string) =>
         { path: 'admin', label: 'Tổng quan', icon: LayoutDashboard },
         { path: 'admin/users', label: 'Người dùng', icon: Users },
         { path: 'admin/tariffs', label: 'Biểu giá', icon: ReceiptText },
-        { path: 'admin/audit', label: 'Nhật ký hệ thống', icon: ShieldCheck }
+        { path: 'admin/audit', label: 'Nhật ký hệ thống', icon: ShieldCheck },
+        { path: 'admin/knowledge', label: 'Kho tri thức', icon: FileText }
     ];
 
     return <><div className="admin-tabs">{tabs.map(t => { const Icon = t.icon; return <Link key={t.path} className={screen === t.path ? 'selected' : ''} href={'/' + t.path}><Icon size={16} /><span>{t.label}</span></Link> })}</div>{error || loading ? <LoadState error={error} loading={loading} /> : screen === 'admin' ? <><div className="metric-grid">{[['users', 'Người dùng', Users, '#2563eb', '#eff6ff'], ['households', 'Hộ gia đình', House, '#059669', '#ecfdf5'], ['bills', 'Hóa đơn', ReceiptText, '#d97706', '#fffbeb'], ['active_accounts', 'Tài khoản hoạt động', Zap, '#0284c7', '#f0f9ff'], ['ai_requests', 'Yêu cầu AI', Sparkles, '#7c3aed', '#f5f3ff'], ['ai_errors', 'Lỗi AI', AlertTriangle, '#dc2626', '#fef2f2']].map(([key, label, Icon, color, bg]: any) => <div className="stat-card-admin" key={key}><div className="stat-head"><span>{label}</span><div className="stat-icon" style={{ background: bg, color: color }}><Icon size={18} /></div></div><div className="stat-val">{data[0][key]}</div></div>)}</div><Panel title="Hoạt động AI gần đây"><DataTable rows={data[0].ai_usage} columns={[{ title: 'Loại phân tích', render: r => <strong>{r.analysis_type}</strong> }, { title: 'Model AI', render: r => <span className="badge">{r.model_name}</span> }, { title: 'Thời điểm', render: r => new Date(r.created_at).toLocaleString('vi-VN') }]} /></Panel></> : screen === 'admin/users' ? <Panel title="Quản lý người dùng hệ thống"><DataTable rows={data[0]} columns={[{ title: 'Người dùng', render: r => <div><strong>{r.full_name}</strong><small>{r.email}</small></div> }, { title: 'Vai trò', render: r => <span className={`badge ${r.role === 'ADMIN' ? 'overdue' : ''}`}>{r.role}</span> }, { title: 'Trạng thái', render: r => <span className={`badge ${r.is_active ? 'paid' : 'overdue'}`}>{r.is_active ? 'Hoạt động' : 'Đã khóa'}</span> }, { title: 'Thao tác', render: r => <Action label={r.is_active ? 'Khóa tài khoản' : 'Mở khóa'} run={() => api('/admin/users/' + r.id, 'PATCH', { is_active: !r.is_active })} done={() => notify()} /> }]} /></Panel> : screen === 'admin/audit' ? <Panel title="Nhật ký hoạt động hệ thống"><DataTable rows={data[0]} columns={[{ title: 'Hành động', render: r => <strong>{r.action}</strong> }, { title: 'Đối tượng', render: r => <span className="badge">{r.entity_type}</span> }, { title: 'ID Thực thể', render: r => <code>{r.entity_id}</code> }, { title: 'Thời điểm', render: r => new Date(r.created_at).toLocaleString('vi-VN') }]} /></Panel> : <><Panel title="Biểu giá hiện có trong hệ thống"><DataTable rows={data[0]} columns={[{ title: 'Tên biểu giá', render: r => <div><strong>{r.name}</strong><small>{r.provider_name}</small></div> }, { title: 'Dịch vụ', render: r => <span className={`badge ${r.utility_type === 'ELECTRICITY' ? 'unpaid' : 'water'}`}>{r.utility_type === 'ELECTRICITY' ? 'Điện' : 'Nước'}</span> }, { title: 'Phân loại / Khu vực', render: r => `${r.tariff_category || 'Sinh hoạt'} (${r.province || 'Toàn quốc'})` }, { title: 'Phiên bản', render: r => <span className="badge">{r.version}</span> }, { title: 'Hiệu lực từ', render: r => r.effective_from }, { title: 'Số bậc', render: r => <strong>{r.tiers.length} bậc</strong> }]} /></Panel><TariffForm notify={notify} /></>}</>

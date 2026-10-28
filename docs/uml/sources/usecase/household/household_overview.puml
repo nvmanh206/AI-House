@@ -1,0 +1,29 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Chủ hộ (Owner)" as owner
+actor "Thành viên (Member)" as member
+
+rectangle "Phân hệ 2: Khởi tạo & Quản lý Hộ gia đình (Household)" {
+    usecase "UC-HOUSEHOLD-SETUP\nThiết lập Hộ gia đình (Wizard Onboarding)" as UC_Setup
+    usecase "UC-INITIAL-METER-CREATE\nKhởi tạo Công tơ Ban đầu" as UC_InitMeter
+    usecase "UC-MEMBER-MGMT\nQuản lý & Phân quyền Thành viên" as UC_MemberMgmt
+    usecase "UC-MEMBER-INVITE\nMời Thành viên mới qua Email" as UC_Invite
+    usecase "UC-ACCEPT-INVITE\nXác nhận Tham gia Hộ gia đình" as UC_Accept
+}
+
+owner -- UC_Setup
+owner -- UC_MemberMgmt
+owner -- UC_Invite
+
+member -- UC_Accept
+
+UC_Setup ..> UC_InitMeter : <<include>>
+UC_Invite ..> UC_MemberMgmt : <<extend>>
+@enduml

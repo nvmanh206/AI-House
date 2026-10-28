@@ -1,0 +1,37 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner / Member" as user
+participant "Web UI (/utility-accounts)" as ui
+participant "FastAPI Router\n(/api/utility-accounts)" as router
+database "PostgreSQL\n(utility_accounts)" as db
+
+title Sơ đồ Trình tự UC-UTILITY-ACCOUNT-MGMT: Quản lý tài khoản dịch vụ
+
+user -> ui: 1. Truy cập danh sách Tài khoản Dịch vụ Điện/Nước
+activate ui
+ui -> router: 2. GET /api/utility-accounts
+activate router
+router -> db: 3. SELECT * FROM utility_accounts WHERE household_id = current_household
+activate db
+db --> router: 4. Danh sách tài khoản dịch vụ
+deactivate db
+router --> ui: 5. HTTP 200 OK [accounts]
+deactivate router
+
+user -> ui: 6. Nhập Mã khách hàng PA13010012345 & Nhà cung cấp EVN
+user -> ui: 7. Bấm "Thêm tài khoản dịch vụ"
+ui -> router: 8. POST /api/utility-accounts {utility_type, provider_name, customer_code}
+activate router
+router -> db: 9. INSERT INTO utility_accounts (household_id, utility_type, provider_name, customer_code)
+activate db
+db --> router: 10. Account record mới
+deactivate db
+router --> ui: 11. HTTP 200 OK {account}
+deactivate router
+ui --> user: 12. Cập nhật bảng tài khoản dịch vụ trên giao diện
+deactivate ui
+@enduml

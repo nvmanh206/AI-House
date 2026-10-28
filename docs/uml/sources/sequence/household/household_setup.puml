@@ -1,0 +1,50 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner (Chủ hộ)" as owner
+participant "Web UI (/onboarding)" as ui
+participant "FastAPI Router\n(POST /api/households)" as router
+participant "Household Service" as service
+database "PostgreSQL\n(households, members, meters)" as db
+
+title Sơ đồ Trình tự UC-HOUSEHOLD-SETUP: Khởi tạo hộ gia đình (Wizard Onboarding)
+
+owner -> ui: 1. Nhập Tên hộ & Địa chỉ (Tỉnh/Thành)
+owner -> ui: 2. Nhấn "Khởi tạo Hộ gia đình"
+activate ui
+ui -> router: 3. POST /api/households {name, address, province, district, ward}
+activate router
+
+router -> service: 4. create_household_with_defaults(owner_id, payload)
+activate service
+service -> db: 5. BEGIN TRANSACTION
+service -> db: 6. INSERT INTO households (name, address, owner_user_id) RETURNING id
+activate db
+db --> service: 7. household_id
+deactivate db
+
+service -> db: 8. INSERT INTO household_members (household_id, user_id, role='OWNER')
+activate db
+db --> service: 9. OK
+deactivate db
+
+service -> db: 10. INSERT INTO meters (household_id, name, utility_type='ELECTRIC')
+service -> db: 11. INSERT INTO meters (household_id, name, utility_type='WATER')
+activate db
+db --> service: 12. Initial meters created
+deactivate db
+
+service -> db: 13. COMMIT TRANSACTION
+service --> router: 14. household_data
+deactivate service
+
+router -> router: 15. Update session context (household_id)
+router --> ui: 16. HTTP 200 OK {id, name, owner_user_id}
+deactivate router
+
+ui --> owner: 17. Hiển thị thông báo thành công & chuyển hướng về /dashboard
+deactivate ui
+@enduml

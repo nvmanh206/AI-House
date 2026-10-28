@@ -1,0 +1,32 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner / Member" as user
+participant "Web UI (/statistics)" as ui
+participant "FastAPI Router\n(GET /api/statistics)" as router
+database "PostgreSQL\n(meter_readings & bills)" as db
+
+title Sơ đồ Trình tự UC-STATISTICS-ALERT: Theo dõi thống kê tiêu thụ
+
+user -> ui: 1. Truy cập màn hình Thống kê tiêu thụ
+activate ui
+ui -> router: 2. GET /api/statistics (Query: range=12m)
+activate router
+
+router -> db: 3. SELECT date, consumption FROM meter_readings WHERE household_id = current_household
+router -> db: 4. SELECT billing_period, final_amount FROM bills WHERE household_id = current_household
+activate db
+db --> router: 5. Dữ liệu lịch sử chỉ số & hóa đơn
+deactivate db
+
+router -> router: 6. Tổng hợp chuỗi dữ liệu theo kỳ hàng tháng & tính phần trăm tăng/giảm
+router --> ui: 7. HTTP 200 OK {monthly_consumption, monthly_costs, compare_with_last_year}
+deactivate router
+
+ui -> ui: 8. Render biểu đồ cột tiêu thụ & đường chi phí (Chart.js / Recharts)
+ui --> user: 9. Hiển thị báo cáo thống kê trực quan
+deactivate ui
+@enduml

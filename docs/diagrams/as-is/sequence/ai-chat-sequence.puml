@@ -1,0 +1,50 @@
+@startuml
+!pragma layout smetana
+autonumber
+actor "Người dùng" as User
+participant "Next.js Chat UI\n(frontend/components/application.tsx)" as UI
+participant "FastAPI Main\n(backend/app/main.py)" as Main
+participant "AgentContext Builder\n(backend/app/ai/context.py)" as Ctx
+participant "Agent\n(backend/app/ai/agent.py)" as Agent
+participant "Intent Router\n(backend/app/ai/router.py)" as Router
+participant "Allowlisted Tools / Gemini\n(backend/app/ai/tools & gemini.py)" as Engine
+participant "Google Gemini API\n(Google AI Studio)" as Gemini
+
+User -> UI: Gửi tin nhắn "Giá điện Thái Nguyên hiện nay là bao nhiêu?"
+UI -> Main: POST /api/ai/chat {message}
+activate Main
+
+Main -> Ctx: build_context(auth, repo)
+activate Ctx
+Ctx --> Main: context (frozen user_id, household_id, permissions)
+deactivate Ctx
+
+Main -> Agent: Agent(context, service).chat(message)
+activate Agent
+
+Agent -> Router: route(message)
+activate Router
+Router --> Agent: intent = 'PUBLIC_TARIFF'
+deactivate Router
+
+Agent -> Engine: extract_tariff_args(message)\n-> utility='ELECTRICITY', location='Thái Nguyên'
+Agent -> Engine: search_tariff(utility, day, location)
+activate Engine
+
+Engine -> Gemini: POST /v1beta/models/gemini-2.0-flash:generateContent\n(x-goog-api-key, google_search tool, canonical prompt)
+activate Gemini
+Gemini --> Engine: HTTP 200 OK Grounding Response (text, groundingMetadata, sources)
+deactivate Gemini
+
+Engine -> Engine: parse(payload) & Format sources [1], [2]
+Engine --> Agent: {message, sources, metadata}
+deactivate Engine
+
+Agent --> Main: Response Dict {message, intent='PUBLIC_TARIFF', sources, metadata}
+deactivate Agent
+
+Main --> UI: 200 OK JSON Response
+deactivate Main
+
+UI --> User: Hiển thị câu trả lời AI kèm trích dẫn nguồn web minh bạch
+@enduml

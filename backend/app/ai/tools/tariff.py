@@ -1,1 +1,1 @@
-def get_tariff(service): return service.tariffs_for_agent()
+def get_tariff(service, *args, **kwargs): return service.tariffs_for_agent()

@@ -1,0 +1,37 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "User" as user
+participant "Web UI Header" as ui
+participant "FastAPI Router\n(PATCH /api/notifications/{id}/read)" as router
+database "PostgreSQL\n(notifications)" as db
+
+title Sơ đồ Trình tự UC-NOTIFICATION-READ: Đánh dấu đã đọc thông báo
+
+user -> ui: 1. Mở danh sách thông báo nhắc chốt số/đóng tiền
+activate ui
+ui -> router: 2. GET /api/notifications
+activate router
+router -> db: 3. SELECT * FROM notifications WHERE user_id = current_user.id ORDER BY created_at DESC
+activate db
+db --> router: 4. Danh sách thông báo
+deactivate db
+router --> ui: 5. HTTP 200 OK [notifications]
+deactivate router
+
+user -> ui: 6. Nhấn vào thông báo hoặc nút "Đánh dấu đã đọc"
+ui -> router: 7. PATCH /api/notifications/{id}/read
+activate router
+router -> db: 8. UPDATE notifications SET is_read = True WHERE id = notification_id
+activate db
+db --> router: 9. OK
+deactivate db
+router --> ui: 10. HTTP 200 OK {id, is_read: true}
+deactivate router
+
+ui --> user: 11. Cập nhật số lượng thông báo chưa đọc trên Header Icon
+deactivate ui
+@enduml

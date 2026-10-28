@@ -1,0 +1,47 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "User / Admin" as user
+participant "Web UI (/login)" as ui
+participant "FastAPI Router\n(POST /api/auth/login)" as router
+participant "Security & AuthService" as service
+database "PostgreSQL\n(users & auth_sessions)" as db
+
+title Sơ đồ Trình tự UC-LOGIN: Đăng nhập hệ thống
+
+user -> ui: 1. Nhập Email & Mật khẩu
+user -> ui: 2. Nhấn "Đăng nhập"
+activate ui
+ui -> router: 3. POST /api/auth/login {email, password}
+activate router
+
+router -> db: 4. SELECT * FROM users WHERE email = ?
+activate db
+db --> router: 5. Trả về user record
+deactivate db
+
+alt User không tồn tại hoặc is_active = False
+    router --> ui: HTTP 401 Unauthorized / 403 Forbidden
+    ui --> user: Hiển thị lỗi "Thông tin đăng nhập không hợp lệ"
+else User hợp lệ
+    router -> service: 6. Argon2id.verify(password_hash, password)
+    activate service
+    service --> router: 7. True (Mật khẩu đúng)
+    deactivate service
+
+    router -> service: 8. issue_jwt_session(user_id)
+    activate service
+    service -> db: 9. INSERT INTO auth_sessions (user_id, refresh_hash, expires_at)
+    service --> router: 10. access_token (15m) + refresh_token (7d)
+    deactivate service
+
+    router --> ui: 11. HTTP 200 OK + Set-Cookie (Refresh) {access_token, user}
+    deactivate router
+
+    ui --> user: 12. Lưu access_token & chuyển hướng đến /dashboard
+    deactivate ui
+end
+@enduml

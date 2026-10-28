@@ -1,0 +1,40 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "User" as user
+participant "Web UI Header" as ui
+participant "FastAPI Router\n(POST /api/households/{id}/select)" as router
+database "PostgreSQL\n(household_members & auth_sessions)" as db
+
+title Sơ đồ Trình tự UC-SELECT-HOUSEHOLD: Chọn hộ gia đình hoạt động
+
+user -> ui: 1. Chọn Hộ gia đình từ Menu thả xuống
+activate ui
+ui -> router: 2. POST /api/households/{id}/select
+activate router
+
+router -> db: 3. SELECT * FROM household_members WHERE household_id = ? AND user_id = current_user.id
+activate db
+db --> router: 4. Member record (role, permissions)
+deactivate db
+
+alt Không có quyền thành viên
+    router --> ui: HTTP 403 Forbidden {message: "Bạn không thuộc hộ gia đình này"}
+    ui --> user: Thông báo lỗi phân quyền
+else Là thành viên hợp lệ
+    router -> db: 5. UPDATE auth_sessions SET household_id = ? WHERE id = session_id
+    activate db
+    db --> router: 6. OK
+    deactivate db
+
+    router --> ui: 7. HTTP 200 OK {household_id, role, permissions}
+    deactivate router
+
+    ui -> ui: 8. Tải lại dữ liệu Dashboard theo Context Hộ mới
+    ui --> user: Cập nhật giao diện theo Hộ gia đình vừa chọn
+    deactivate ui
+end
+@enduml

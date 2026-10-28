@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Chủ hộ (Owner)" as owner
+actor "Thành viên (Member)" as member
+actor "Trợ lý AI (AI Assistant)" as aiAgent <<System>>
+
+rectangle "Hệ thống Quản lý Hóa đơn Nhà Mình - AI Chatbot RAG" {
+    usecase "UC-AI-CHATBOT\nHỏi đáp Trợ lý AI Agent" as UC_AIChatbot
+    usecase "UC-RAG-HYBRID-SEARCH\nTruy xuất Ngữ cảnh RAG (Vector + BM25)" as UC_RAG
+}
+
+owner -- UC_AIChatbot
+member -- UC_AIChatbot
+UC_AIChatbot -- aiAgent
+
+UC_AIChatbot ..> UC_RAG : <<include>>
+@enduml

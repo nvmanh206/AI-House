@@ -1,0 +1,24 @@
+@startuml
+!pragma layout smetana
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Chủ hộ / Thành viên" as User
+actor "Gemini API (Google AI Studio)" as Gemini
+
+rectangle "Module Trợ Lý AI (AI Assistant Subsystem)" {
+    usecase "UC07.1: Trò chuyện chung (General Chat)" as UC07_1
+    usecase "UC07.2: Phân tích lịch sử tiêu thụ (Consumption Analysis)" as UC07_2
+    usecase "UC07.3: Dự báo tiền điện/nước kỳ tới (Bill Forecast)" as UC07_3
+    usecase "UC07.4: Phát hiện bất thường & Khuyên tiết kiệm (Anomaly & Savings)" as UC07_4
+    usecase "UC07.5: Tra cứu giá điện/nước công cộng online" as UC07_5
+}
+
+User --> UC07_1
+User --> UC07_2
+User --> UC07_3
+User --> UC07_4
+User --> UC07_5
+
+UC07_5 --> Gemini
+@enduml

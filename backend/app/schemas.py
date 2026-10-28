@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal
 from typing import Literal
+from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 Utility = Literal['ELECTRICITY','WATER']
@@ -68,6 +69,9 @@ class ReadingInput(Input):
         if (self.reading_date.year,self.reading_date.month) != (self.year,self.month):
             raise ValueError('Ngày ghi phải thuộc kỳ hóa đơn')
         return self
+class ReadingUpdate(Input):
+    current_reading: Decimal = Field(ge=0, max_digits=14, decimal_places=3)
+    reading_date: date | None = None
 class TierInput(Input):
     from_value: Decimal = Field(ge=0, max_digits=14, decimal_places=3)
     to_value: Decimal | None = Field(default=None, gt=0, max_digits=14, decimal_places=3)
@@ -99,6 +103,17 @@ class PaymentInput(Input):
     bill_id: str
     reference: str = Field(default='', max_length=120)
 class ChatInput(Input):
-    message: str = Field(min_length=1, max_length=2000)
+    conversation_id: UUID | None = None
+    message: str | None = Field(default='', max_length=2000)
+    image_base64: str | None = Field(default=None, max_length=15000000)
+    raw_ocr_text: str | None = Field(default=None, max_length=10000)
+    @model_validator(mode='after')
+    def check_input(self):
+        has_msg = bool(self.message and self.message.strip())
+        has_img = bool(self.image_base64 and self.image_base64.strip())
+        has_ocr = bool(self.raw_ocr_text and self.raw_ocr_text.strip())
+        if not (has_msg or has_img or has_ocr):
+            raise ValueError('Cần cung cấp tin nhắn, ảnh hóa đơn hoặc văn bản OCR')
+        return self
 class UserUpdate(Input):
     is_active: bool

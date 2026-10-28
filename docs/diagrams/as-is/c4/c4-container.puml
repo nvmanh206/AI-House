@@ -1,0 +1,23 @@
+@startuml
+!include <C4/C4_Container>
+
+TITLE C4 Container Diagram - Hệ thống Quản lý Hóa đơn Điện Nước (Nhà Mình)
+
+Person(user, "Người dùng / Chủ hộ", "Sử dụng các tính năng quản lý hóa đơn, nhập chỉ số & AI Chat.")
+
+Container_Boundary(system, "Hệ thống Nhà Mình Boundary") {
+    Container(frontend, "Frontend Container (Web App)", "Next.js 15, React 19, Tailwind v4", "Giao diện SPA rendered phía Client, tích hợp custom memory caching layer.")
+    Container(backend, "Backend Container (API Gateway & Core Services)", "Python 3.12, FastAPI, Pydantic v2", "Cung cấp RESTful API, thực thi Billing Engine, Auth middleware, Rate Limiting & AI Agent.")
+    Container(scheduler, "Scheduler Container (Background Worker)", "Python 3.12, APScheduler", "Tiến trình chạy ngầm quét hạn nợ & hạn chốt chỉ số để tạo thông báo tự động.")
+    ContainerDb(db, "Database Container", "PostgreSQL 16", "Lưu trữ dữ liệu người dùng, hộ gia đình, chỉ số công tơ, hóa đơn, biểu giá snapshot & audit logs.")
+}
+
+System_Ext(gemini, "Google Gemini REST API", "Dịch vụ AI tra cứu biểu giá công cộng online qua Search Grounding.")
+
+Rel(user, frontend, "Truy cập ứng dụng qua Trình duyệt Web", "HTTPS / Port 3000")
+Rel(frontend, backend, "Gọi API RESTful", "HTTPS / JSON / Bearer JWT / Port 8000")
+Rel(backend, db, "Truy vấn & Lưu trữ dữ liệu", "SQLAlchemy 2 / Asyncpg / Port 5432")
+Rel(scheduler, db, "Đọc tài khoản & ghi thông báo", "SQLAlchemy 2 / Port 5432")
+Rel(backend, gemini, "Gửi Yêu cầu tra cứu Google Search Grounding", "HTTPS / JSON REST")
+
+@enduml

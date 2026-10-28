@@ -1,0 +1,42 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Guest (Khách)" as guest
+participant "Web UI (/register)" as ui
+participant "FastAPI Router\n(POST /api/auth/register)" as router
+participant "Security & AuthService" as service
+database "PostgreSQL\n(users table)" as db
+
+title Sơ đồ Trình tự UC-REGISTER: Đăng ký tài khoản
+
+guest -> ui: 1. Nhập Họ tên, Email, Password
+guest -> ui: 2. Nhấn nút "Đăng ký"
+activate ui
+ui -> ui: 3. Validate client side (email syntax, password >= 8 chars)
+ui -> router: 4. POST /api/auth/register {email, password, full_name}
+activate router
+
+router -> db: 5. SELECT * FROM users WHERE email = ?
+activate db
+db --> router: 6. Trả về None (email chưa tồn tại)
+deactivate db
+
+router -> service: 7. Argon2id.hash(password)
+activate service
+service --> router: 8. password_hash
+deactivate service
+
+router -> db: 9. INSERT INTO users (email, password_hash, full_name, role)
+activate db
+db --> router: 10. Trả về user_id, status=CREATED
+deactivate db
+
+router --> ui: 11. HTTP 200 OK {id, email, full_name, role}
+deactivate router
+
+ui --> guest: 12. Hiển thị thông báo đăng ký thành công & chuyển hướng sang /login
+deactivate ui
+@enduml

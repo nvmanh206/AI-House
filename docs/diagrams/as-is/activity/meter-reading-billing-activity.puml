@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+title Quy trình Nhập chỉ số Công tơ & Tính Hóa đơn (Meter Reading & Billing Activity)
+
+start
+:Người dùng chọn Công tơ & Nhập chỉ số mới;
+:Nhập ngày ghi chỉ số;
+
+if (Chỉ số mới >= Chỉ số cũ?) then (Đúng)
+    :Tính lượng tiêu thụ = Chỉ số mới - Chỉ số cũ;
+    :Lưu chỉ số mới vào CSDL (MeterReading);
+    :Tìm Biểu giá bậc thang (Tariff & TariffTier) phù hợp;
+    
+    if (Tìm thấy Biểu giá phù hợp?) then (Có)
+        :Tính toán số tiền theo từng bậc tiêu thụ;
+        :Cộng tổng tiền ước tính (estimated_amount);
+        :Lưu Snapshot phiên bản biểu giá & chi tiết từng bậc;
+        :Tạo Hóa đơn mới (Bill) trạng thái UNPAID;
+        :Trả về kết quả 201 Created & Hiển thị Hóa đơn;
+        stop
+    else (Không)
+        :Báo lỗi TARIFF_NOT_FOUND (409 Conflict);
+        stop
+    endif
+else (Sai - Chỉ số nhỏ hơn chỉ số cũ)
+    :Báo lỗi INVALID_READING (400 Bad Request);
+    stop
+endif
+@enduml

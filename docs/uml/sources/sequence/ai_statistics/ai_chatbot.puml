@@ -1,0 +1,48 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner / Member" as user
+participant "Web UI (/chat)" as ui
+participant "FastAPI Router\n(POST /api/ai/chat)" as router
+participant "AI Agent Core" as agent
+participant "ChromaDB\n(RAG Vector Store)" as vector
+participant "LLM Provider\n(Gemini 1.5 Flash)" as llm
+database "PostgreSQL\n(bills & readings)" as db
+
+title Sơ đồ Trình tự UC-AI-CHATBOT: Hỏi đáp với Trợ lý AI Agent RAG
+
+user -> ui: 1. Nhập câu hỏi (ví dụ: "Tại sao tiền điện tháng này tăng cao?")
+activate ui
+ui -> router: 2. POST /api/ai/chat {message, household_id}
+activate router
+
+router -> agent: 3. process_user_query(message, household_context)
+activate agent
+
+agent -> vector: 4. RAG Hybrid Search (Vector cosine + BM25 lexical)
+activate vector
+vector --> agent: 5. Top 4 Relevant Context Chunks (Văn bản EVN QĐ 2699)
+deactivate vector
+
+agent -> db: 6. Truy vấn chỉ số & hóa đơn 3 tháng gần nhất của hộ
+activate db
+db --> agent: 7. Billing & Consumption history
+deactivate db
+
+agent -> llm: 8. Generate Prompt (Context + History + Chain-of-Thought Prompt)
+activate llm
+llm --> agent: 9. Streamed response with text & citation metadata
+deactivate llm
+
+agent --> router: 10. {reply_text, citations, tools_used}
+deactivate agent
+
+router --> ui: 11. HTTP 200 OK {reply}
+deactivate router
+
+ui --> user: 12. Hiển thị câu trả lời AI kèm trích dẫn nguồn minh bạch
+deactivate ui
+@enduml

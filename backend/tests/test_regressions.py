@@ -5,14 +5,17 @@ from app.repository import Repository
 from app.notification_service import NotificationService
 from conftest import register,setup_house,reading
 
-def test_missing_tariff_rolls_back(client,ready,db):
+def test_missing_tariff_preserves_reading_without_bill(client,ready,db):
     h,_,meter=ready
     for t in db.query(Tariff): t.is_active=False
     db.commit()
     result=reading(client,h,meter)
-    assert result.status_code==409
-    assert db.query(MeterReading).count()==0
+    assert result.status_code==201
+    assert result.json()['bill'] is None
+    assert result.json()['billing_status']=='TARIFF_NOT_FOUND'
+    assert db.query(MeterReading).count()==1
     assert db.query(Bill).count()==0
+    assert not db.query(Notification).filter_by(type='BILL_CREATED').count()
 
 def test_meter_reactivation_cannot_duplicate(client,ready):
     h,_,meter=ready

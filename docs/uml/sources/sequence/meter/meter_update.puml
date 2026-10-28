@@ -1,0 +1,36 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner (Chủ hộ)" as owner
+participant "Web UI (/meters)" as ui
+participant "FastAPI Router\n(PATCH /api/meters/{id})" as router
+database "PostgreSQL\n(meters & audit_logs)" as db
+
+title Sơ đồ Trình tự UC-METER-UPDATE: Cập nhật thông tin công tơ
+
+owner -> ui: 1. Chọn công tơ cần chỉnh sửa & cập nhật tên / trạng thái
+owner -> ui: 2. Bấm "Lưu thay đổi"
+activate ui
+ui -> router: 3. PATCH /api/meters/{id} {name, is_active}
+activate router
+
+router -> db: 4. SELECT * FROM meters WHERE id = ? AND household_id = current_household
+activate db
+db --> router: 5. Meter record
+deactivate db
+
+router -> db: 6. UPDATE meters SET name = ?, is_active = ? WHERE id = ?
+router -> db: 7. INSERT INTO audit_logs (user_id, household_id, action='UPDATE_METER')
+activate db
+db --> router: 8. OK
+deactivate db
+
+router --> ui: 9. HTTP 200 OK {meter}
+deactivate router
+
+ui --> owner: 10. Cập nhật thông tin công tơ trên danh sách
+deactivate ui
+@enduml

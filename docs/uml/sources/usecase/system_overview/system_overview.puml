@@ -1,0 +1,120 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 13
+skinparam dpi 180
+skinparam rectangleBackgroundColor #F9FAFB
+skinparam rectangleBorderColor #D1D5DB
+skinparam packageBackgroundColor #FFFFFF
+skinparam packageBorderColor #9CA3AF
+
+title Nhà Mình — Sơ đồ Use Case tổng quan
+
+' External Actors (Left Side)
+actor "Guest\n(Khách truy cập)" as guest
+actor "User\n(Người dùng)" as user
+actor "Owner\n(Chủ hộ gia đình)" as owner
+actor "Member\n(Thành viên hộ)" as member
+
+' External Actors / Systems (Right Side)
+actor "Admin\n(Quản trị viên)" as admin
+actor "VNPay Gateway\n(Hệ thống ngoài)" as vnpay <<External System>>
+
+rectangle "Hệ thống Quản lý Hóa đơn Điện Nước Hộ Gia Đình (Nhà Mình)" {
+    
+    package "1. Tài khoản & Xác thực" {
+        usecase "Đăng ký tài khoản\n(UC-REGISTER)" as UC_Register
+        usecase "Đăng nhập hệ thống\n(UC-LOGIN)" as UC_Login
+        usecase "Đăng xuất hệ thống\n(UC-LOGOUT)" as UC_Logout
+        usecase "Cập nhật hồ sơ cá nhân\n(UC-USER-PROFILE)" as UC_Profile
+    }
+
+    package "2. Hộ gia đình & Thành viên" {
+        usecase "Khởi tạo hộ gia đình\n(UC-HOUSEHOLD-SETUP)" as UC_Setup
+        usecase "Chọn hộ gia đình hoạt động\n(UC-SELECT-HOUSEHOLD)" as UC_SelectH
+        usecase "Quản lý thành viên hộ\n(UC-MEMBER-MGMT)" as UC_Member
+        usecase "Mời thành viên vào hộ\n(UC-MEMBER-INVITE)" as UC_Invite
+    }
+
+    package "3. Công tơ & Chỉ số" {
+        usecase "Quản lý tài khoản dịch vụ\n(UC-UTILITY-ACCOUNT-MGMT)" as UC_Account
+        usecase "Khai báo công tơ điện nước\n(UC-METER-MGMT)" as UC_Meter
+        usecase "Cập nhật thông tin công tơ\n(UC-METER-UPDATE)" as UC_MeterUpdate
+        usecase "Ghi nhận chỉ số công tơ\n(UC-READING-ENTRY)" as UC_Reading
+        usecase "Nhận diện chỉ số từ ảnh (OCR)\n(UC-OCR-READING)\n<<Future Extension>>" as UC_OCR
+    }
+
+    package "4. Hóa đơn & Thanh toán" {
+        usecase "Tự động tính tiền bậc thang\n(UC-BILL-CALCULATION)" as UC_BillCalc
+        usecase "Xem chi tiết hóa đơn\n(UC-BILL-QUERY)" as UC_BillQuery
+        usecase "Xuất hóa đơn PDF\n(UC-EXPORT-PDF)" as UC_PDF
+        usecase "Ghi nhận thanh toán thủ công\n(UC-PAYMENT-ENTRY)" as UC_Payment
+        usecase "Thanh toán hóa đơn trực tuyến\n(UC-ONLINE-PAYMENT)\n<<Future Extension>>" as UC_OnlinePay
+    }
+
+    package "5. Thống kê & Thông báo" {
+        usecase "Theo dõi thống kê tiêu thụ\n(UC-STATISTICS-ALERT)" as UC_Stat
+        usecase "Đánh dấu đã đọc thông báo\n(UC-NOTIFICATION-READ)" as UC_NotifRead
+    }
+
+    package "6. Trợ lý AI & Dự báo" {
+        usecase "Hỏi đáp với Trợ lý AI Agent\n(UC-AI-CHATBOT)" as UC_AIChat
+        usecase "AI Dự báo & Bất thường\n(UC-AI-FORECAST-ANOMALY)" as UC_AIForecast
+    }
+
+    package "7. Quản trị hệ thống" {
+        usecase "Quản lý người dùng Admin\n(UC-ADMIN-USER-MGMT)" as UC_AdminUser
+        usecase "Cấu hình biểu giá bậc thang\n(UC-ADMIN-TARIFF-CONFIG)" as UC_AdminTariff
+        usecase "Tra cứu nhật ký hệ thống\n(UC-ADMIN-AUDIT-LOG)" as UC_AdminAudit
+    }
+}
+
+' Actor Interactions (Left Side)
+guest -- UC_Register
+guest -- UC_Login
+
+user -- UC_Login
+user -- UC_Logout
+user -- UC_Profile
+user -- UC_SelectH
+user -- UC_NotifRead
+
+owner -- UC_Setup
+owner -- UC_Member
+owner -- UC_Invite
+owner -- UC_Account
+owner -- UC_Meter
+owner -- UC_MeterUpdate
+owner -- UC_Reading
+owner -- UC_OCR
+owner -- UC_BillQuery
+owner -- UC_PDF
+owner -- UC_Payment
+owner -- UC_OnlinePay
+owner -- UC_Stat
+owner -- UC_AIChat
+owner -- UC_AIForecast
+
+member -- UC_Reading
+member -- UC_OCR
+member -- UC_BillQuery
+member -- UC_PDF
+member -- UC_Payment
+member -- UC_Stat
+member -- UC_AIChat
+member -- UC_AIForecast
+
+' Actor Interactions (Right Side)
+admin -- UC_AdminUser
+admin -- UC_AdminTariff
+admin -- UC_AdminAudit
+
+vnpay -- UC_OnlinePay
+
+' UML Relationships between Use Cases
+UC_Reading ..> UC_BillCalc : <<include>>
+UC_PDF ..> UC_BillQuery : <<extend>>\n[Condition: Đang xem chi tiết]
+@enduml

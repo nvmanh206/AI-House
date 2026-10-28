@@ -1,0 +1,40 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "User" as user
+participant "Web UI (/profile)" as ui
+participant "FastAPI Router\n(PATCH /api/auth/me & POST /password)" as router
+participant "Security Hasher" as service
+database "PostgreSQL\n(users table)" as db
+
+title Sơ đồ Trình tự UC-USER-PROFILE: Cập nhật hồ sơ cá nhân
+
+user -> ui: 1. Nhập Họ tên mới hoặc Đổi mật khẩu
+activate ui
+
+alt Cập nhật Thông tin Cá nhân
+    ui -> router: 2. PATCH /api/auth/me {full_name}
+    activate router
+    router -> db: 3. UPDATE users SET full_name = ? WHERE id = current_user.id
+    db --> router: 4. User record mới
+    router --> ui: 5. HTTP 200 OK {user}
+    deactivate router
+else Thay đổi Mật khẩu
+    ui -> router: 6. POST /api/auth/password {current_password, new_password}
+    activate router
+    router -> service: 7. Argon2id.verify(user.password_hash, current_password)
+    service --> router: 8. True
+    router -> service: 9. Argon2id.hash(new_password)
+    service --> router: 10. new_password_hash
+    router -> db: 11. UPDATE users SET password_hash = ? WHERE id = current_user.id
+    db --> router: 12. OK
+    router --> ui: 13. HTTP 200 OK {message: "Mật khẩu đã được cập nhật"}
+    deactivate router
+end
+
+ui --> user: 14. Hiển thị thông báo cập nhật hồ sơ thành công
+deactivate ui
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner / Member" as user
+participant "Web UI (/forecast)" as ui
+participant "FastAPI Router\n(GET /api/statistics/forecast)" as router
+participant "Forecast & Anomaly Services" as ai_service
+database "PostgreSQL\n(meter_readings)" as db
+
+title Sơ đồ Trình tự UC-AI-FORECAST-ANOMALY: AI Dự báo WMA & Phát hiện Rò rỉ Bất thường
+
+user -> ui: 1. Mở trang Dự báo & Phát hiện Bất thường
+activate ui
+ui -> router: 2. GET /api/statistics/forecast
+activate router
+
+router -> db: 3. SELECT reading_date, consumption FROM meter_readings WHERE household_id = current_household ORDER BY reading_date ASC
+activate db
+db --> router: 4. Chuỗi dữ liệu sản lượng lịch sử
+deactivate db
+
+router -> ai_service: 5. predict_wma(consumption_series, weights=[0.5, 0.3, 0.2])
+activate ai_service
+ai_service --> router: 6. predicted_next_consumption & estimated_cost
+deactivate ai_service
+
+router -> ai_service: 7. detect_anomalies(consumption_series, rolling_window=6, threshold=2.0)
+activate ai_service
+ai_service --> router: 8. list_of_anomalies (VD: Tháng 8 tăng 250% nghi rò rỉ nước)
+deactivate ai_service
+
+router --> ui: 9. HTTP 200 OK {forecast: {next_kwh, next_cost}, anomalies: [...]}
+deactivate router
+
+ui --> user: 10. Hiển thị dự báo sản lượng kỳ tới & cảnh báo đỏ nếu phát hiện rò rỉ
+deactivate ui
+@enduml

@@ -96,7 +96,7 @@ export function ExecutiveSpendingChart({ data, metric = 'cost' }: { data: any[];
   const isElec = metric === 'ELECTRICITY';
   const isWater = metric === 'WATER';
   const color = isElec ? ELECTRICITY_COLOR : isWater ? WATER_COLOR : PRIMARY_COLOR;
-  const name = isElec ? 'Tiền điện (kWh)' : isWater ? 'Tiền nước (m³)' : 'Tổng chi phí (₫)';
+  const name = isElec ? 'Lượng điện (kWh)' : isWater ? 'Lượng nước (m³)' : 'Tổng chi phí (₫)';
 
   return (
     <div className="chart" style={{ width: '100%', height: 300 }}>

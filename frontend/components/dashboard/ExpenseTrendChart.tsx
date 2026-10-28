@@ -20,10 +20,10 @@ export function ExpenseTrendChart({ series }: ExpenseTrendChartProps) {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
           <h2 className="text-base font-bold text-slate-900">
-            Xu hướng chi phí 6 tháng
+            {metric === 'cost' ? 'Xu hướng chi phí 6 tháng' : 'Mức sử dụng 6 tháng'}
           </h2>
           <p className="text-xs text-slate-500">
-            Tổng chi phí tiện ích (điện + nước)
+            {metric === 'cost' ? 'Tổng tiền đã ghi nhận (điện + nước)' : metric === 'ELECTRICITY' ? 'Lượng điện đã ghi nhận (kWh)' : 'Lượng nước đã ghi nhận (m³)'}
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export function ExpenseTrendChart({ series }: ExpenseTrendChartProps) {
                 : 'hover:text-slate-900'
             }`}
           >
-            Tiền điện
+            Lượng điện
           </button>
           <button
             onClick={() => setMetric('WATER')}
@@ -57,7 +57,7 @@ export function ExpenseTrendChart({ series }: ExpenseTrendChartProps) {
                 : 'hover:text-slate-900'
             }`}
           >
-            Tiền nước
+            Lượng nước
           </button>
         </div>
       </div>

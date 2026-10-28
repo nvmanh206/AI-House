@@ -1,5 +1,4 @@
-'use client';
-
+import { useMemo } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Zap, Droplets, Activity } from 'lucide-react';
 
@@ -33,11 +32,13 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export function UtilityTrendsChart({ data }: UtilityTrendsChartProps) {
-  const formattedData = data.map(item => ({
-    period: item.period,
-    Điện: item.ELECTRICITY ?? 300,
-    Nước: item.WATER ?? 10,
-  }));
+  const formattedData = useMemo(() => {
+    return data.map(item => ({
+      period: item.period,
+      Điện: item.ELECTRICITY ?? 0,
+      Nước: item.WATER ?? 0,
+    }));
+  }, [data]);
 
   return (
     <div className="bg-white/80 backdrop-blur-2xl border border-white/90 shadow-[0_10px_35px_rgba(15,23,42,0.04)] rounded-3xl p-6 mb-6">

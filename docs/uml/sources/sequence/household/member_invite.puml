@@ -1,0 +1,55 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner (Chủ hộ)" as owner
+actor "Member (Thành viên)" as member
+participant "Web UI" as ui
+participant "FastAPI Router\n(/api/members/invite)" as router
+participant "Email Service" as mail
+database "PostgreSQL\n(member_invites)" as db
+
+title Sơ đồ Trình tự UC-MEMBER-INVITE: Mời thành viên vào hộ gia đình (Email Token)
+
+owner -> ui: 1. Nhập email người thân & bấm "Gửi thư mời"
+activate ui
+ui -> router: 2. POST /api/members/invite {email}
+activate router
+
+router -> db: 3. INSERT INTO member_invites (household_id, email, token, expires_at=48h, status='PENDING')
+activate db
+db --> router: 4. Invite Token
+deactivate db
+
+router -> mail: 5. send_invite_email(email, invite_link_with_token)
+activate mail
+mail --> router: 6. Email Sent OK
+deactivate mail
+
+router --> ui: 7. HTTP 200 OK {message: "Đã gửi thư mời qua email"}
+deactivate router
+ui --> owner: 8. Thông báo đã gửi lời mời thành công
+deactivate ui
+
+member -> ui: 9. Bấm link nhận được từ Email
+activate ui
+ui -> router: 10. POST /api/members/accept-invite {token}
+activate router
+router -> db: 11. SELECT * FROM member_invites WHERE token = ? AND expires_at > now()
+activate db
+db --> router: 12. Invite hợp lệ
+deactivate db
+
+router -> db: 13. INSERT INTO household_members (household_id, user_id, role='MEMBER')
+router -> db: 14. UPDATE member_invites SET status = 'ACCEPTED'
+activate db
+db --> router: 15. OK
+deactivate db
+
+router --> ui: 16. HTTP 200 OK {message: "Tham gia hộ thành công"}
+deactivate router
+ui --> member: 17. Hiển thị Dashboard Hộ gia đình vừa gia nhập
+deactivate ui
+@enduml

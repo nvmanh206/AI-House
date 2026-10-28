@@ -23,17 +23,17 @@ function quantity(n: number | null | undefined): string {
 }
 
 export function StatSummaryCards({ summary }: StatSummaryCardsProps) {
-  const elecAvg = summary.ELECTRICITY?.average ?? 300;
-  const elecLow = summary.ELECTRICITY?.lowest ?? 280;
-  const elecHigh = summary.ELECTRICITY?.highest ?? 320;
+  const elecAvg = summary.ELECTRICITY?.average ?? null;
+  const elecLow = summary.ELECTRICITY?.lowest ?? null;
+  const elecHigh = summary.ELECTRICITY?.highest ?? null;
 
-  const waterAvg = summary.WATER?.average ?? 10;
-  const waterLow = summary.WATER?.lowest ?? 8;
-  const waterHigh = summary.WATER?.highest ?? 14;
+  const waterAvg = summary.WATER?.average ?? null;
+  const waterLow = summary.WATER?.lowest ?? null;
+  const waterHigh = summary.WATER?.highest ?? null;
 
-  const costAvg = summary.cost?.average ?? 673200;
-  const costLow = summary.cost?.lowest ?? 520000;
-  const costHigh = summary.cost?.highest ?? 673200;
+  const costAvg = summary.cost?.average ?? null;
+  const costLow = summary.cost?.lowest ?? null;
+  const costHigh = summary.cost?.highest ?? null;
 
   const animatedElec = useCountUp(typeof elecAvg === 'number' ? elecAvg : 0);
   const animatedWater = useCountUp(typeof waterAvg === 'number' ? waterAvg : 0);

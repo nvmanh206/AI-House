@@ -1,0 +1,37 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 55
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 13
+skinparam dpi 180
+skinparam rectangleBackgroundColor #F9FAFB
+skinparam rectangleBorderColor #D1D5DB
+
+title Sơ đồ Use Case — Tra cứu và xem chi tiết hóa đơn
+
+' External Actors
+actor "Owner\n(Chủ hộ gia đình)" as owner
+actor "Member\n(Thành viên hộ)" as member
+
+rectangle "Hệ thống Quản lý Hóa đơn Điện Nước Hộ Gia Đình (Nhà Mình) — Tra cứu và xem chi tiết hóa đơn" {
+    
+    usecase "Tra cứu danh sách hóa đơn\n(UC-BILL-LIST)" as UC_BillList
+    usecase "Xem chi tiết hóa đơn\n(UC-BILL-DETAIL)" as UC_BillDetail
+    usecase "Xuất hóa đơn PDF\n(UC-BILL-EXPORT-PDF)" as UC_ExportPDF
+}
+
+' Actor Associations
+owner -- UC_BillList
+owner -- UC_BillDetail
+owner -- UC_ExportPDF
+
+member -- UC_BillList
+member -- UC_BillDetail
+member -- UC_ExportPDF
+
+' UML Extend Relationship
+UC_ExportPDF ..> UC_BillDetail : <<extend>>\n[Condition: Chọn xuất file PDF]\n[Extension Point: Hiển thị chi tiết hóa đơn]
+
+@enduml

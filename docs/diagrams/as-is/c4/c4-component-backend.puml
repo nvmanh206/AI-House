@@ -1,0 +1,36 @@
+@startuml
+!include <C4/C4_Component>
+
+TITLE C4 Component Diagram - Backend Container (FastAPI Backend Application)
+
+Container(frontend, "Frontend Container", "Next.js 15 SPA", "Gửi các yêu cầu REST API.")
+ContainerDb(db, "PostgreSQL 16 Database", "PostgreSQL", "Lưu trữ toàn bộ dữ liệu quan hệ.")
+System_Ext(gemini, "Google Gemini REST API", "Google Search Grounding")
+
+Container_Boundary(backend, "FastAPI Backend Application Boundary") {
+    Component(main_ctrl, "Main Router Controller", "backend/app/main.py", "Đăng ký các REST Endpoints và điều hướng Yêu cầu.")
+    Component(sec_mw, "Security & Auth Middleware", "backend/app/security.py", "Xác thực JWT Access Token, HttpOnly Refresh Cookie, Rate Limiting & Audit Log.")
+    Component(house_svc, "Household & User Service", "backend/app/services.py", "Xử lý đăng ký, khởi tạo Onboarding Hộ gia đình và quản lý thành viên.")
+    Component(billing_svc, "Billing Engine Service", "backend/app/billing_service.py", "Thực thi tính toán tiền điện 6 bậc EVN & tiền nước theo Decimal, lưu Snapshot.")
+    Component(stat_svc, "Statistics & Forecast Service", "backend/app/forecast_service.py & anomaly_service.py", "Tính toán dự báo tiêu thụ WMA & phát hiện bất thường chỉ số.")
+    Component(ai_agent, "AI Agent Engine Subsystem", "backend/app/ai/agent.py & router.py", "Intent Routing, Skill Registry, Allowlisted Tools & Gemini Search Integration.")
+    Component(repo, "Repository Layer", "backend/app/repository.py", "Tương tác SQLAlchemy ORM với Database PostgreSQL.")
+}
+
+Rel(frontend, sec_mw, "Gửi HTTPS Requests kèm JWT Bearer Token")
+Rel(sec_mw, main_ctrl, "Cho phép truy cập Endpoint sau khi xác thực thành công")
+
+Rel(main_ctrl, house_svc, "Điều hướng /api/households, /api/members")
+Rel(main_ctrl, billing_svc, "Điều hướng /api/readings, /api/bills")
+Rel(main_ctrl, stat_svc, "Điều hướng /api/statistics")
+Rel(main_ctrl, ai_agent, "Điều hướng /api/ai/chat")
+
+Rel(house_svc, repo, "Thực thi CRUD Hộ gia đình & Công tơ")
+Rel(billing_svc, repo, "Đọc Biểu giá & Lưu Hóa đơn snapshot")
+Rel(stat_svc, repo, "Đọc lịch sử 12 kỳ tiêu thụ")
+Rel(ai_agent, repo, "Đọc context an toàn qua Allowlisted Tools")
+Rel(ai_agent, gemini, "Gọi REST API tra cứu online khi intent='PUBLIC_TARIFF'")
+
+Rel(repo, db, "Đọc/Ghi dữ liệu SQL")
+
+@enduml

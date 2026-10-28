@@ -1,0 +1,43 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner (Chủ hộ)" as owner
+participant "Web UI" as ui
+participant "FastAPI Router\n(POST /api/payments/vnpay)" as router
+participant "VNPay Gateway" as vnpay
+database "PostgreSQL\n(payments & bills)" as db
+
+title Sơ đồ Trình tự UC-ONLINE-PAYMENT: Thanh toán hóa đơn trực tuyến (VNPay / MoMo)
+
+owner -> ui: 1. Nhấn nút "Thanh toán VNPay"
+activate ui
+ui -> router: 2. POST /api/payments/vnpay {bill_id}
+activate router
+router -> vnpay: 3. create_payment_url(bill_id, amount, return_url)
+activate vnpay
+vnpay --> router: 4. vnpay_payment_url
+deactivate vnpay
+router --> ui: 5. HTTP 200 OK {payment_url}
+deactivate router
+
+ui --> owner: 6. Chuyển hướng sang trang VNPay Gateway
+owner -> vnpay: 7. Quét mã QR / Nhập thẻ ngân hàng thanh toán
+activate vnpay
+vnpay -> router: 8. IPN Webhook Callback (vnp_ResponseCode == '00')
+activate router
+router -> db: 9. UPDATE bills SET status = 'PAID', paid_at = now() WHERE id = bill_id
+router -> db: 10. INSERT INTO payments (bill_id, method='VNPAY', status='COMPLETED')
+activate db
+db --> router: 11. OK
+deactivate db
+router --> vnpay: 12. {RspCode: '00', Message: 'Confirm Success'}
+deactivate router
+
+vnpay --> ui: 13. Redirect back to Website (Return URL)
+deactivate vnpay
+ui --> owner: 14. Hiển thị kết quả "Thanh toán trực tuyến thành công!"
+deactivate ui
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Guest / User" as user
+actor "FastAPI Auth Service" as authService <<System>>
+
+rectangle "Phân hệ 1: Quản trị Tài khoản & Xác thực (Auth)" {
+    usecase "UC-REGISTER\nĐăng ký Tài khoản Người dùng" as UC_Register
+    usecase "UC-LOGIN\nĐăng nhập & Cấp Session JWT" as UC_Login
+    usecase "UC-VALIDATE-USER-INPUT\nKiểm tra Định dạng Đầu vào" as UC_Validate
+    usecase "UC-VERIFY-CREDENTIALS\nXác thực Email & Mật khẩu Bcrypt" as UC_Verify
+    usecase "UC-REFRESH-TOKEN\nCấp mới Access Token" as UC_Refresh
+}
+
+user -- UC_Register
+user -- UC_Login
+
+UC_Register -- authService
+UC_Login -- authService
+
+UC_Register ..> UC_Validate : <<include>>
+UC_Login ..> UC_Verify : <<include>>
+UC_Refresh ..> UC_Login : <<extend>>
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Hệ thống (System)" as system <<System>>
+actor "Chủ hộ (Owner)" as owner
+actor "Thành viên (Member)" as member
+
+rectangle "Phân hệ 4: Tính toán & Quản lý Hóa đơn (Billing)" {
+    usecase "UC-BILL-CALCULATION\nTự động Tính tiền Bậc thang" as UC_BillCalc
+    usecase "UC-APPLY-TIERED-TARIFF\nPhân rã Sản lượng Decimal" as UC_ApplyTariff
+    usecase "UC-BILL-QUERY\nTruy vấn Lịch sử & Chi tiết Hóa đơn" as UC_BillQuery
+    usecase "UC-EXPORT-PDF\nKết xuất & Tải Hóa đơn PDF" as UC_ExportPDF
+    usecase "UC-PAYMENT-ENTRY\nGhi nhận Thanh toán Thủ công" as UC_PaymentEntry
+}
+
+system -- UC_BillCalc
+owner -- UC_BillQuery
+member -- UC_BillQuery
+owner -- UC_PaymentEntry
+member -- UC_PaymentEntry
+
+UC_BillCalc ..> UC_ApplyTariff : <<include>>
+UC_ExportPDF ..> UC_BillQuery : <<extend>>
+@enduml

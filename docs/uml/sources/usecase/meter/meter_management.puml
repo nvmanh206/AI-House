@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Chủ hộ (Owner)" as owner
+actor "Thành viên (Member)" as member
+
+rectangle "Hệ thống Quản lý Hóa đơn Nhà Mình - Quản lý Công tơ" {
+    usecase "UC-METER-MGMT\nKhai báo & Quản lý Danh mục Công tơ" as UC_MeterMgmt
+    usecase "UC-METER-UPDATE\nCập nhật Thông số & Trạng thái Công tơ" as UC_MeterUpdate
+}
+
+owner -- UC_MeterMgmt
+member -- UC_MeterMgmt
+owner -- UC_MeterUpdate
+
+UC_MeterUpdate ..> UC_MeterMgmt : <<extend>>
+@enduml

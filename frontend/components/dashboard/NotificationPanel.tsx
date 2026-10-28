@@ -8,29 +8,9 @@ interface NotificationPanelProps {
 }
 
 export function NotificationPanel({ notifications }: NotificationPanelProps) {
-  const items = notifications.length ? notifications.slice(0, 3) : [
-    {
-      id: 'n1',
-      title: 'Hóa đơn tiền điện kỳ 09/2026 đã được tạo',
-      desc: 'Số tiền 673.200 đ - Hạn thanh toán 28/09/2026',
-      time: '2 giờ trước',
-      type: 'bill'
-    },
-    {
-      id: 'n2',
-      title: 'Cập nhật tính năng Trợ lý AI',
-      desc: 'Trải nghiệm phiên bản Trợ lý thông minh hơn.',
-      time: '1 ngày trước',
-      type: 'ai'
-    },
-    {
-      id: 'n3',
-      title: 'Chỉ số điện đã được ghi nhận',
-      desc: 'Chỉ số tháng 9/2026: 300 kWh',
-      time: '3 ngày trước',
-      type: 'reading'
-    }
-  ];
+  const items = [...notifications].sort((a, b) =>
+    Date.parse(b.sent_at || b.created_at) - Date.parse(a.sent_at || a.created_at)
+  ).slice(0, 3);
 
   return (
     <motion.div
@@ -57,6 +37,7 @@ export function NotificationPanel({ notifications }: NotificationPanelProps) {
       </div>
 
       <div className="space-y-2.5">
+        {!items.length && <p className="text-sm text-slate-600">Chưa có thông báo.</p>}
         {items.map((n: any) => (
           <div
             key={n.id}
@@ -70,11 +51,13 @@ export function NotificationPanel({ notifications }: NotificationPanelProps) {
                 {n.title}
               </h3>
               <p className="mt-0.5 text-[11px] text-slate-500 leading-snug">
-                {n.desc || n.message}
+                {n.message}
               </p>
             </div>
             <span className="shrink-0 text-[10px] font-medium text-slate-400">
-              {n.time || 'vừa xong'}
+              {Number.isFinite(Date.parse(n.sent_at || n.created_at))
+                ? new Intl.DateTimeFormat('vi-VN', {dateStyle: 'short', timeZone: 'Asia/Ho_Chi_Minh'}).format(new Date(n.sent_at || n.created_at))
+                : 'Chưa có thời gian'}
             </span>
           </div>
         ))}

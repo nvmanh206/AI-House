@@ -1,0 +1,36 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner / Member" as user
+participant "Web UI" as ui
+participant "FastAPI Router\n(GET /api/bills/{id}/pdf)" as router
+participant "PDF Renderer Engine" as pdf
+database "PostgreSQL\n(bills & households)" as db
+
+title Sơ đồ Trình tự UC-EXPORT-PDF: Kết xuất hóa đơn PDF
+
+user -> ui: 1. Nhấn nút "Tải PDF Hóa đơn" tại trang chi tiết
+activate ui
+ui -> router: 2. GET /api/bills/{bill_id}/pdf
+activate router
+
+router -> db: 3. SELECT * FROM bills JOIN households WHERE id = bill_id
+activate db
+db --> router: 4. Bill & Household Data
+deactivate db
+
+router -> pdf: 5. render_pdf_template(bill_data)
+activate pdf
+pdf -> pdf: 6. Biên dịch HTML/CSS template sang PDF stream
+pdf --> router: 7. pdf_bytes
+deactivate pdf
+
+router --> ui: 8. HTTP 200 OK (Content-Type: application/pdf)
+deactivate router
+
+ui --> user: 9. Trình duyệt tự động mở hộp thoại tải file PDF về máy
+deactivate ui
+@enduml

@@ -1,4 +1,5 @@
 import httpx
+import json
 import pytest
 from app.config import settings
 from app.ai.router import route
@@ -12,14 +13,17 @@ from conftest import register,setup_house,reading
  ('Điện được tính theo bậc thang như thế nào?','từng bậc'),
  ('Làm sao tiết kiệm điện?','gợi ý chung'),
 ])
-def test_basic_without_network_or_readings(client,monkeypatch,message,expected):
+def test_basic_questions_use_gemini_without_canned_answer(client,monkeypatch,message,expected):
     h=register(client);setup_house(client,h)
     monkeypatch.setattr(settings,'llm_provider','gemini')
-    def forbidden(*a,**kw): raise AssertionError('Basic explanation must not call Gemini/Search')
-    monkeypatch.setattr(httpx,'post',forbidden)
+    monkeypatch.setattr(settings,'gemini_api_key','test-key')
+    generated = 'Nội dung sinh riêng cho câu hỏi: ' + message
+    def post(*a,**kw):
+        return httpx.Response(200,json={'candidates':[{'finishReason':'STOP','content':{'parts':[{'text':json.dumps({'requested_task':'EXPLAIN','status':'ANSWERED','message':generated,'evidence_refs':[]})}]}}]})
+    monkeypatch.setattr(httpx,'post',post)
     r=client.post('/api/ai/chat',headers=h,json={'message':message})
-    assert r.status_code==200 and r.json()['intent']=='BASIC_KNOWLEDGE'
-    assert expected in r.json()['message']
+    assert r.status_code==200 and r.json()['metadata']['provider']=='gemini'
+    assert generated == r.json()['message']
 
 def test_quota_fallback_has_labeled_local_tariff(client,ready,monkeypatch):
     h,_,_=ready
@@ -29,20 +33,16 @@ def test_quota_fallback_has_labeled_local_tariff(client,ready,monkeypatch):
     monkeypatch.setattr(httpx,'post',post)
     r=client.post('/api/ai/chat',headers=h,json={'message':'giá điện Thái Nguyên'})
     body=r.json()
-    assert r.status_code==200 and len(calls)==1
-    assert 'DỮ LIỆU DEMO' in body['message'] and '2020-01-01' in body['message']
-    assert '1,000 VND/kWh' in body['message']
-    assert body['sources']==[] and body['metadata']['grounded'] is False
-    assert body['metadata']['error_code']=='GEMINI_SEARCH_QUOTA'
+    # Search and natural explanation are separate calls; the fallback is labeled configured data, not a price claim.
+    assert r.status_code==429 and len(calls)==2
+    assert body['error']['code']=='GEMINI_QUOTA' and 'message' not in body
 
 def test_no_data_quota_fallback_does_not_invent_price(client,monkeypatch):
     h=register(client);setup_house(client,h)
     monkeypatch.setattr(settings,'llm_provider','gemini');monkeypatch.setattr(settings,'gemini_api_key','test-key')
     monkeypatch.setattr(httpx,'post',lambda *a,**kw:httpx.Response(429,json={}))
     body=client.post('/api/ai/chat',headers=h,json={'message':'giá điện Thái Nguyên'}).json()
-    assert 'chưa có biểu giá phù hợp' in body['message']
-    assert 'từng bậc' in body['message']
-    assert body['metadata']['configured_tariffs']==[]
+    assert body['error']['code']=='GEMINI_QUOTA' and 'message' not in body
 
 @pytest.mark.parametrize('count',[0,1])
 def test_forecast_explains_remaining_periods(client,ready,count):

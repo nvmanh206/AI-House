@@ -1,0 +1,1902 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "tool_versions": {
+    "plantuml": "PlantUML version 1.2024.7 (Sat Sep 07 18:18:17 ICT 2024)\r\n(GPL source distribution)\r\nJava Runtime: OpenJDK Runtime Environment\r\nJVM: OpenJDK 64-Bit Server VM\r\nDefault Encoding: Cp1252\r\nLanguage: en\r\nCountry: US\r\n \r\nPLANTUML_LIMIT_SIZE: 4096\r\n\r\nDot version: dot - graphviz version 2.44.1 (20200629.0846)\r\nInstallation seems OK. File generation OK"
+  },
+  "files": [
+    {
+      "path": "docs/uml/sources/sequence/admin/admin_audit_log.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/admin/admin_audit_log.svg",
+        "docs/uml/sources/sequence/admin/admin_audit_log.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\admin\\admin_audit_log.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/admin/admin_tariff_config.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/admin/admin_tariff_config.svg",
+        "docs/uml/sources/sequence/admin/admin_tariff_config.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\admin\\admin_tariff_config.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/admin/admin_user_mgmt.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/admin/admin_user_mgmt.svg",
+        "docs/uml/sources/sequence/admin/admin_user_mgmt.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\admin\\admin_user_mgmt.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/ai_statistics/ai_chatbot.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/ai_statistics/ai_chatbot.svg",
+        "docs/uml/sources/sequence/ai_statistics/ai_chatbot.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\ai_statistics\\ai_chatbot.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/ai_statistics/ai_forecast_anomaly.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/ai_statistics/ai_forecast_anomaly.svg",
+        "docs/uml/sources/sequence/ai_statistics/ai_forecast_anomaly.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\ai_statistics\\ai_forecast_anomaly.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/ai_statistics/notification_read.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/ai_statistics/notification_read.svg",
+        "docs/uml/sources/sequence/ai_statistics/notification_read.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\ai_statistics\\notification_read.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/ai_statistics/statistics_alert.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/ai_statistics/statistics_alert.svg",
+        "docs/uml/sources/sequence/ai_statistics/statistics_alert.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\ai_statistics\\statistics_alert.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/auth/login.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/auth/login.svg",
+        "docs/uml/sources/sequence/auth/login.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\auth\\login.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/auth/logout.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/auth/logout.svg",
+        "docs/uml/sources/sequence/auth/logout.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\auth\\logout.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/auth/register.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/auth/register.svg",
+        "docs/uml/sources/sequence/auth/register.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\auth\\register.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/auth/user_profile.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/auth/user_profile.svg",
+        "docs/uml/sources/sequence/auth/user_profile.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\auth\\user_profile.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/billing/bill_calculation.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/billing/bill_calculation.svg",
+        "docs/uml/sources/sequence/billing/bill_calculation.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\billing\\bill_calculation.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/billing/bill_query.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/billing/bill_query.svg",
+        "docs/uml/sources/sequence/billing/bill_query.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\billing\\bill_query.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/billing/export_pdf.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/billing/export_pdf.svg",
+        "docs/uml/sources/sequence/billing/export_pdf.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\billing\\export_pdf.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/billing/online_payment.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/billing/online_payment.svg",
+        "docs/uml/sources/sequence/billing/online_payment.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\billing\\online_payment.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/billing/payment_entry.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/billing/payment_entry.svg",
+        "docs/uml/sources/sequence/billing/payment_entry.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\billing\\payment_entry.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/household/household_setup.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/household/household_setup.svg",
+        "docs/uml/sources/sequence/household/household_setup.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\household\\household_setup.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/household/member_invite.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/household/member_invite.svg",
+        "docs/uml/sources/sequence/household/member_invite.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\household\\member_invite.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/household/member_management.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/household/member_management.svg",
+        "docs/uml/sources/sequence/household/member_management.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\household\\member_management.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/household/select_household.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/household/select_household.svg",
+        "docs/uml/sources/sequence/household/select_household.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\household\\select_household.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/meter/meter_management.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/meter/meter_management.svg",
+        "docs/uml/sources/sequence/meter/meter_management.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\meter\\meter_management.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/meter/meter_update.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/meter/meter_update.svg",
+        "docs/uml/sources/sequence/meter/meter_update.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\meter\\meter_update.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/meter/ocr_reading.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/meter/ocr_reading.svg",
+        "docs/uml/sources/sequence/meter/ocr_reading.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\meter\\ocr_reading.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/meter/reading_entry.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/meter/reading_entry.svg",
+        "docs/uml/sources/sequence/meter/reading_entry.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\meter\\reading_entry.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/sequence/meter/utility_account_mgmt.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/sequence/meter/utility_account_mgmt.svg",
+        "docs/uml/sources/sequence/meter/utility_account_mgmt.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\sequence\\meter\\utility_account_mgmt.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/admin/admin_management.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/admin/admin_management.svg",
+        "docs/uml/sources/usecase/admin/admin_management.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\admin\\admin_management.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/ai_statistics/ai_chatbot.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/ai_statistics/ai_chatbot.svg",
+        "docs/uml/sources/usecase/ai_statistics/ai_chatbot.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\ai_statistics\\ai_chatbot.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/ai_statistics/ai_forecast_anomaly.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/ai_statistics/ai_forecast_anomaly.svg",
+        "docs/uml/sources/usecase/ai_statistics/ai_forecast_anomaly.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\ai_statistics\\ai_forecast_anomaly.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/ai_statistics/ai_statistics_overview.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/ai_statistics/ai_statistics_overview.svg",
+        "docs/uml/sources/usecase/ai_statistics/ai_statistics_overview.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\ai_statistics\\ai_statistics_overview.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/ai_statistics/statistics_alert.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/ai_statistics/statistics_alert.svg",
+        "docs/uml/sources/usecase/ai_statistics/statistics_alert.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\ai_statistics\\statistics_alert.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/auth/auth_overview.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/auth/auth_overview.svg",
+        "docs/uml/sources/usecase/auth/auth_overview.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\auth\\auth_overview.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/auth/login.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/auth/login.svg",
+        "docs/uml/sources/usecase/auth/login.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\auth\\login.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/auth/register.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/auth/register.svg",
+        "docs/uml/sources/usecase/auth/register.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\auth\\register.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/billing/bill_calculation.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/billing/bill_calculation.svg",
+        "docs/uml/sources/usecase/billing/bill_calculation.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\billing\\bill_calculation.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/billing/bill_query.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/billing/bill_query.svg",
+        "docs/uml/sources/usecase/billing/bill_query.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\billing\\bill_query.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/billing/billing_overview.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/billing/billing_overview.svg",
+        "docs/uml/sources/usecase/billing/billing_overview.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\billing\\billing_overview.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/billing/payment_entry.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/billing/payment_entry.svg",
+        "docs/uml/sources/usecase/billing/payment_entry.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\billing\\payment_entry.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/household/household_overview.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/household/household_overview.svg",
+        "docs/uml/sources/usecase/household/household_overview.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\household\\household_overview.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/household/household_setup.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/household/household_setup.svg",
+        "docs/uml/sources/usecase/household/household_setup.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\household\\household_setup.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/household/member_management.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/household/member_management.svg",
+        "docs/uml/sources/usecase/household/member_management.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\household\\member_management.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/meter/meter_management.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/meter/meter_management.svg",
+        "docs/uml/sources/usecase/meter/meter_management.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\meter\\meter_management.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/meter/meter_overview.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/meter/meter_overview.svg",
+        "docs/uml/sources/usecase/meter/meter_overview.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\meter\\meter_overview.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/meter/reading_entry.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/meter/reading_entry.svg",
+        "docs/uml/sources/usecase/meter/reading_entry.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\meter\\reading_entry.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    },
+    {
+      "path": "docs/uml/sources/usecase/system_overview/system_overview.puml",
+      "status": "passed",
+      "outputs": [
+        "docs/uml/sources/usecase/system_overview/system_overview.svg",
+        "docs/uml/sources/usecase/system_overview/system_overview.png"
+      ],
+      "commands": [
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-checkonly",
+          "-failfast2",
+          "-charset",
+          "UTF-8",
+          "F:\\Web\\AI_Household_Utility_Billing\\website\\docs\\uml\\sources\\usecase\\system_overview\\system_overview.puml"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tsvg",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ],
+        [
+          "C:\\Program Files\\BellSoft\\LibericaJDK-11-Full\\bin\\java.EXE",
+          "-Djava.awt.headless=true",
+          "-jar",
+          "C:\\Users\\Admin\\AppData\\Local\\Temp\\plantuml.jar",
+          "-tpng",
+          "-pipe",
+          "-failfast2",
+          "-charset",
+          "UTF-8"
+        ]
+      ]
+    }
+  ],
+  "scope": "Syntax/render only; semantic and visual review must be performed separately."
+}

@@ -1,0 +1,41 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "User" as user
+participant "Web UI" as ui
+participant "FastAPI Router\n(POST /api/readings/ocr)" as router
+participant "AI OCR Provider" as ocr
+database "PostgreSQL\n(meter_readings)" as db
+
+title Sơ đồ Trình tự UC-OCR-READING: Nhận diện chỉ số từ ảnh công tơ (AI OCR)
+
+user -> ui: 1. Tải ảnh chụp mặt đồng hồ công tơ lên
+activate ui
+ui -> router: 2. POST /api/readings/ocr (FormData multipart/image)
+activate router
+
+router -> ocr: 3. process_image(image_bytes)
+activate ocr
+ocr -> ocr: 4. Bounding Box Detection & Text Extraction
+ocr --> router: 5. {predicted_reading: 1450, confidence: 0.95}
+deactivate ocr
+
+router --> ui: 6. HTTP 200 OK {predicted_reading, confidence, image_url}
+deactivate router
+
+ui --> user: 7. Hiển thị chỉ số trích xuất & yêu cầu người dùng xác nhận
+user -> ui: 8. Nhấn "Xác nhận & Lưu chỉ số"
+ui -> router: 9. POST /api/readings {meter_id, current_reading=1450, is_confirmed=True}
+activate router
+router -> db: 10. INSERT INTO meter_readings (source='OCR', is_confirmed=True)
+activate db
+db --> router: 11. OK
+deactivate db
+router --> ui: 12. HTTP 200 OK
+deactivate router
+ui --> user: 13. Cập nhật lượt ghi chỉ số từ AI OCR
+deactivate ui
+@enduml

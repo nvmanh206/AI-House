@@ -1,0 +1,47 @@
+@startuml
+!pragma layout smetana
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Khách" as Guest
+actor "Chủ hộ (Owner)" as Owner
+actor "Thành viên (Member)" as Member
+actor "Quản trị viên (Admin)" as Admin
+actor "Scheduler (Hệ thống ngầm)" as Scheduler
+actor "Gemini API (External)" as Gemini
+
+rectangle "Hệ thống Quản lý Hóa đơn Điện Nước Hộ Gia Đình (Nhà Mình)" {
+    usecase "UC01: Đăng ký & Đăng nhập" as UC01
+    usecase "UC02: Thiết lập Hộ gia đình (Onboarding)" as UC02
+    usecase "UC03: Nhập chỉ số công tơ" as UC03
+    usecase "UC04: Tính toán & Phát hành Hóa đơn" as UC04
+    usecase "UC05: Thanh toán Hóa đơn" as UC05
+    usecase "UC06: Xem Thống kê & Dự báo chi tiêu" as UC06
+    usecase "UC07: Hỏi đáp Trợ lý AI" as UC07
+    usecase "UC08: Tra cứu giá điện/nước online" as UC08
+    usecase "UC09: Tạo thông báo nhắc lịch tự động" as UC09
+    usecase "UC10: Quản lý Người dùng & Biểu giá DB" as UC10
+}
+
+Guest --> UC01
+
+Owner --> UC01
+Owner --> UC02
+Owner --> UC03
+Owner --> UC05
+Owner --> UC06
+Owner --> UC07
+
+Member --> UC01
+Member --> UC06
+Member --> UC07
+
+Admin --> UC01
+Admin --> UC10
+
+Scheduler --> UC09
+UC07 ..> UC08 : <<include>>
+UC08 --> Gemini
+
+UC03 ..> UC04 : <<include>>
+@enduml

@@ -1,0 +1,29 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Admin (Quản trị viên)" as admin
+participant "Web UI (/admin/audit)" as ui
+participant "FastAPI Router\n(GET /api/admin/audit)" as router
+database "PostgreSQL\n(audit_logs)" as db
+
+title Sơ đồ Trình tự UC-ADMIN-AUDIT-LOG: Tra cứu nhật ký hệ thống Audit Log
+
+admin -> ui: 1. Mở trang Nhật ký Hệ thống Audit Log
+activate ui
+ui -> router: 2. GET /api/admin/audit
+activate router
+
+router -> db: 3. SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 200
+activate db
+db --> router: 4. 200 bản ghi audit log mới nhất
+deactivate db
+
+router --> ui: 5. HTTP 200 OK [audit_logs]
+deactivate router
+
+ui --> admin: 6. Hiển thị bảng nhật ký truy vết gồm IP, người dùng, thời gian và thao tác
+deactivate ui
+@enduml

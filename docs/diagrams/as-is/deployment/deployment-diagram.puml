@@ -1,0 +1,53 @@
+@startuml
+!pragma layout smetana
+skinparam componentStyle uml2
+
+node "Host Operating System (Windows / Linux Container Host)" {
+    node "Docker Engine / Docker Compose Network (utility-billing-net)" {
+        
+        node "Frontend Container (nhaminh-frontend)" {
+            artifact "Next.js Build & Node Runtime" as NextRuntime
+            artifact "Client-side SPA & Custom Cache" as FrontSPA
+            portin "Port 3000" as P3000
+        }
+        
+        node "Backend Container (nhaminh-backend)" {
+            artifact "Python 3.12 Runtime" as PyRuntime
+            artifact "FastAPI Application (Uvicorn)" as FastAPIApp
+            artifact "APScheduler Background Worker" as SchedulerWorker
+            portin "Port 8000" as P8000
+        }
+        
+        node "PostgreSQL Container (nhaminh-db)" {
+            database "PostgreSQL 16 Engine" as PGData
+            portin "Port 5432" as P5432
+        }
+    }
+    
+    node "Portable Local Environment (Fallback)" {
+        database "Local PostgreSQL (Port 5433)" as LocalPG
+    }
+}
+
+cloud "External Services Cloud" {
+    node "Google AI Studio Cloud" {
+        component "Gemini 1.5 Pro / 2.0 Flash API" as GeminiCloud
+    }
+    node "Public Internet" {
+        component "Google Search Grounding Engine" as GoogleSearch
+    }
+}
+
+P3000 --> NextRuntime
+NextRuntime --> P8000 : HTTP REST / JSON API (Port 8000)
+PyRuntime --> FastAPIApp
+PyRuntime --> SchedulerWorker
+
+FastAPIApp --> P5432 : Asyncpg SQL Connection (Port 5432)
+SchedulerWorker --> P5432 : Asyncpg SQL Connection (Port 5432)
+
+FastAPIApp ..> LocalPG : Optional Local Fallback (Port 5433)
+FastAPIApp --> GeminiCloud : HTTPS REST API (x-goog-api-key)
+GeminiCloud --> GoogleSearch : Search Grounding Queries
+
+@enduml

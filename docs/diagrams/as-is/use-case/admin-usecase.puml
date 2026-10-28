@@ -1,0 +1,19 @@
+@startuml
+!pragma layout smetana
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Quản trị viên (Admin)" as Admin
+
+rectangle "Module Quản Trị Hệ Thống (Admin Subsystem)" {
+    usecase "UC10.1: Xem tổng quan hệ thống (Overview)" as UC10_1
+    usecase "UC10.2: Quản lý Danh sách Người dùng (Khóa/Role)" as UC10_2
+    usecase "UC10.3: Tạo phiên bản Biểu giá mới (Tariff/Tier)" as UC10_3
+    usecase "UC10.4: Xem Nhật ký truy vết (Audit Logs)" as UC10_4
+}
+
+Admin --> UC10_1
+Admin --> UC10_2
+Admin --> UC10_3
+Admin --> UC10_4
+@enduml

@@ -1,0 +1,21 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Trợ lý AI (AI Assistant)" as aiAgent <<System>>
+actor "Chủ hộ (Owner)" as owner
+actor "Thành viên (Member)" as member
+
+rectangle "Hệ thống Quản lý Hóa đơn Nhà Mình - AI Dự báo & Cảnh báo" {
+    usecase "UC-AI-FORECAST-ANOMALY\nAI Dự báo WMA & Phát hiện Bất thường" as UC_AIForecast
+}
+
+aiAgent -- UC_AIForecast
+UC_AIForecast -- owner
+UC_AIForecast -- member
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Chủ hộ (Owner)" as owner
+
+rectangle "Hệ thống Quản lý Hóa đơn Nhà Mình - Khởi tạo Hộ" {
+    usecase "UC-HOUSEHOLD-SETUP\nThiết lập Hộ gia đình (Wizard Onboarding)" as UC_Setup
+    usecase "UC-INITIAL-METER-CREATE\nKhởi tạo Công tơ Ban đầu" as UC_InitMeter
+}
+
+owner -- UC_Setup
+UC_Setup ..> UC_InitMeter : <<include>>
+@enduml

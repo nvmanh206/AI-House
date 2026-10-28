@@ -1,0 +1,34 @@
+@startuml
+!pragma layout smetana
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Chủ hộ (Owner)" as Owner
+actor "Thành viên (Member)" as Member
+
+rectangle "Module Hộ Gia Đình & Hóa Đơn (Household & Billing)" {
+    usecase "UC02.1: Khởi tạo Hộ gia đình" as UC02_1
+    usecase "UC02.2: Đăng ký Tài khoản Tiện ích (Điện/Nước)" as UC02_2
+    usecase "UC02.3: Thêm Công tơ ban đầu" as UC02_3
+    usecase "UC02.4: Mời Thành viên tham gia" as UC02_4
+    
+    usecase "UC03: Nhập chỉ số công tơ định kỳ" as UC03
+    usecase "UC04: Tự động tính toán & sinh Bill" as UC04
+    usecase "UC05: Ghi nhận Thanh toán thủ công (Manual Pay)" as UC05
+    usecase "UC06: Xem Thống kê & Xu hướng tiêu thụ" as UC06
+}
+
+Owner --> UC02_1
+Owner --> UC02_2
+Owner --> UC02_3
+Owner --> UC02_4
+Owner --> UC03
+Owner --> UC05
+Owner --> UC06
+
+Member --> UC06
+
+UC03 ..> UC04 : <<include>>
+UC02_1 ..> UC02_2 : <<include>>
+UC02_2 ..> UC02_3 : <<include>>
+@enduml

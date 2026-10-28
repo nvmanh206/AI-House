@@ -1,0 +1,53 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner (Chủ hộ)" as owner
+participant "Web UI (/members)" as ui
+participant "FastAPI Router\n(/api/members)" as router
+database "PostgreSQL\n(users & household_members)" as db
+
+title Sơ đồ Trình tự UC-MEMBER-MGMT: Quản lý thành viên hộ
+
+owner -> ui: 1. Truy cập danh sách thành viên
+activate ui
+ui -> router: 2. GET /api/members
+activate router
+router -> db: 3. SELECT * FROM household_members JOIN users WHERE household_id = current_household
+activate db
+db --> router: 4. Danh sách thành viên
+deactivate db
+router --> ui: 5. HTTP 200 OK [members]
+deactivate router
+
+alt Thêm Thành viên Trực tiếp
+    owner -> ui: 6. Nhập Email người thân & bấm "Thêm thành viên"
+    ui -> router: 7. POST /api/members {email, role='MEMBER'}
+    activate router
+    router -> db: 8. SELECT * FROM users WHERE email = ?
+    activate db
+    db --> router: 9. User target
+    deactivate db
+    router -> db: 10. INSERT INTO household_members (household_id, user_id, role)
+    activate db
+    db --> router: 11. Member record mới
+    deactivate db
+    router --> ui: 12. HTTP 200 OK {member}
+    deactivate router
+else Xóa Thành viên khỏi Hộ
+    owner -> ui: 13. Bấm nút "Xóa" trên dòng thành viên
+    ui -> router: 14. DELETE /api/members/{member_id}
+    activate router
+    router -> db: 15. DELETE FROM household_members WHERE id = member_id
+    activate db
+    db --> router: 16. OK
+    deactivate db
+    router --> ui: 17. HTTP 200 OK {message: "Đã xóa thành viên"}
+    deactivate router
+end
+
+ui --> owner: 18. Cập nhật bảng danh sách thành viên trên giao diện
+deactivate ui
+@enduml

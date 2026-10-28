@@ -1,0 +1,30 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner / Member" as user
+participant "Web UI (/meters)" as ui
+participant "FastAPI Router\n(/api/meters)" as router
+database "PostgreSQL\n(meters table)" as db
+
+title Sơ đồ Trình tự UC-METER-MGMT: Khai báo công tơ điện nước
+
+user -> ui: 1. Nhập Tên công tơ, Mã công tơ, Loại tiện ích (ELECTRIC/WATER) & Chỉ số ban đầu
+user -> ui: 2. Bấm "Thêm công tơ mới"
+activate ui
+ui -> router: 3. POST /api/meters {name, meter_code, utility_type, initial_reading, utility_account_id}
+activate router
+
+router -> db: 4. INSERT INTO meters (household_id, utility_account_id, name, meter_code, utility_type, initial_reading, is_active=True)
+activate db
+db --> router: 5. Meter record vừa khởi tạo
+deactivate db
+
+router --> ui: 6. HTTP 200 OK {id, name, meter_code, utility_type}
+deactivate router
+
+ui --> user: 7. Hiển thị công tơ mới trong danh mục công tơ của hộ
+deactivate ui
+@enduml

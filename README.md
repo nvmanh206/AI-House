@@ -1,31 +1,19 @@
 # Nhà Mình — Quản lý hóa đơn điện nước có tích hợp AI
 
-**Cập nhật Gemini:** Đã thêm tra cứu giá điện/nước qua Gemini + Google Search và link nguồn. Điền key trong `backend/.env` theo [hướng dẫn Gemini](docs/gemini.md). Dữ liệu/hóa đơn nội bộ vẫn tính local. Các ghi chú “chưa có LLM mạng” trong báo cáo bàn giao ban đầu mô tả phiên bản trước cập nhật này.
+## Clone và chạy
 
-Đồ án modular monolith: **Next.js / React / Tailwind CSS / Bootstrap** → **FastAPI / Pydantic / SQLAlchemy 2** → **PostgreSQL**. V1 tự nhập chỉ số, tính hóa đơn bậc thang, nhắc hạn và trợ lý tiếng Việt. Tiền VND, timezone `Asia/Ho_Chi_Minh`.
-
-## Chạy nhanh với Docker
-
-Yêu cầu: Docker Desktop đang chạy (Linux containers), Python để tạo `.env`. Không cần cài Python dependency trên máy nếu chạy hoàn toàn bằng Docker.
-
-```powershell
+```sh
 cd website
-python scripts/setup_env.py
-docker compose up --build -d
-docker compose exec backend python -m app.seed --demo
+docker compose up -d --build --wait
 ```
 
-- Giao diện: http://localhost:3000
-- REST API: http://localhost:8000/api
-- OpenAPI: http://localhost:8000/docs
-- PostgreSQL có volume `postgres_data`; `docker compose down` giữ dữ liệu. Không dùng `down -v` nếu cần giữ DB.
-- Scheduler là process riêng dùng cùng backend, chạy 07:00 mỗi ngày và một lần lúc khởi động. Không phải microservice độc lập.
+Mở http://localhost:3000, đăng ký tài khoản đầu tiên để quản trị và tạo hộ của bạn. Không cần `.env` để khởi động; Gemini cần key riêng khi sử dụng AI. PostgreSQL, pgAdmin, migration và danh mục biểu giá công khai được cấu hình tự động. Không seed dữ liệu hộ demo. Xem [hướng dẫn Docker](DOCKER_GUIDE.md) về dữ liệu bền vững, cấu hình Gemini và tài khoản pgAdmin.
 
 ## Chạy từng phần để phát triển
 
 Yêu cầu: Python 3.12+; Node.js 22+; PostgreSQL 16+.
 
-**Môi trường bàn giao hiện tại:** Docker Desktop bị lỗi; PostgreSQL portable 16.15 đã có trong `.local/` và `backend/.env` trỏ `127.0.0.1:5433`. Có thể dùng `python scripts/local_postgres.py start` rồi chạy backend/frontend bên dưới, bỏ qua lệnh Docker. Khi quay lại Docker hoặc PostgreSQL ở cổng 5432, cập nhật DATABASE_URL trong `backend/.env` tương ứng. File example vẫn dùng cấu hình phổ biến 5432.
+**Ghi chú lịch sử máy phát triển (không áp dụng cho clone Docker mới):** PostgreSQL portable 16.15 chạy tại `127.0.0.1:5433`, database ứng dụng `utility_app`; pgAdmin Docker tại `http://127.0.0.1:5050`. SQLite trước đây đã được sao lưu và chuyển đổi, đối chiếu đủ 15 bảng trước khi đổi `backend/.env`. Database PostgreSQL `utility` cũ vẫn được giữ nguyên. Xem [hướng dẫn PostgreSQL và pgAdmin](docs/POSTGRESQL-PGADMIN.md) trước khi khởi động; không tự chuyển sang database Docker ở cổng 5434.
 
 ```powershell
 cd website
@@ -35,8 +23,7 @@ cd backend
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -r requirements.lock.txt
 .\.venv\Scripts\python -m alembic upgrade head
-.\.venv\Scripts\python -m app.seed --demo
-.\.venv\Scripts\python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000 
 ```
 
 Terminal khác:
@@ -78,7 +65,7 @@ npm run typecheck
 npm audit
 ```
 
-Pytest mặc định dùng SQLite in-memory với foreign keys. Để kiểm thử PostgreSQL: tạo **database test riêng**, đặt `TEST_DATABASE_URL=postgresql+psycopg://.../utility_test` rồi chạy pytest. Không đặt URL database production vào biến test. Xem kết quả thực tế và giới hạn trong [docs/verification.md](docs/verification.md).
+Lệnh pytest trực tiếp vẫn mặc định SQLite. Để chạy đúng PostgreSQL đang dùng, từ `website` chạy `.\backend\.venv\Scripts\python.exe scripts/test_postgres.py`: runner dùng database riêng `utility_app_test`, không dùng database ứng dụng và không xóa dữ liệu có sẵn. Kết quả mới nhất: 86 passed trên PostgreSQL. `utility_test` cũ thiếu cột, đã giữ nguyên để tránh sửa nhầm schema. Xem [hướng dẫn PostgreSQL và pgAdmin](docs/POSTGRESQL-PGADMIN.md).
 
 ## Cấu trúc
 
@@ -117,6 +104,7 @@ website/
 
 ## Tài liệu và phạm vi
 
+- [Tổng quan & Phân tích chi tiết toàn diện](TONG_QUAN_DU_AN_CHI_TIET.md)
 - [Kiến trúc](docs/architecture.md), [Database](docs/database.md), [API](docs/api.md)
 - [AI Agent](docs/ai-agent.md), [Bảo mật](docs/security.md), [Phát triển](docs/development.md)
 - [Kế hoạch](docs/implementation-plan.md), [Kiểm chứng](docs/verification.md), [Báo cáo bàn giao](docs/delivery.md)

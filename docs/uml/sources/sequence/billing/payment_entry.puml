@@ -1,0 +1,36 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner / Member" as user
+participant "Web UI" as ui
+participant "FastAPI Router\n(POST /api/payments)" as router
+database "PostgreSQL\n(payments & bills)" as db
+
+title Sơ đồ Trình tự UC-PAYMENT-ENTRY: Ghi nhận thanh toán thủ công
+
+user -> ui: 1. Chọn hóa đơn UNPAID & Nhấn "Đánh dấu đã thanh toán"
+user -> ui: 2. Chọn phương thức (Chuyển khoản / Tiền mặt) & Lưu
+activate ui
+ui -> router: 3. POST /api/payments {bill_id, amount, method, reference}
+activate router
+
+router -> db: 4. SELECT * FROM bills WHERE id = bill_id AND household_id = current_household
+activate db
+db --> router: 5. Bill record
+deactivate db
+
+router -> db: 6. INSERT INTO payments (bill_id, amount, method, status='COMPLETED', paid_at=now())
+router -> db: 7. UPDATE bills SET status = 'PAID', paid_at = now() WHERE id = bill_id
+activate db
+db --> router: 8. Payment created & Bill updated
+deactivate db
+
+router --> ui: 9. HTTP 200 OK {payment_id, status: "PAID"}
+deactivate router
+
+ui --> user: 10. Chuyển nhãn hóa đơn sang "Đã thanh toán (PAID)"
+deactivate ui
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Owner / Member" as user
+participant "Web UI (/bills)" as ui
+participant "FastAPI Router\n(GET /api/bills & /api/bills/{id})" as router
+database "PostgreSQL\n(bills table)" as db
+
+title Sơ đồ Trình tự UC-BILL-QUERY: Truy vấn & xem chi tiết hóa đơn
+
+user -> ui: 1. Màn hình Hóa đơn hộ gia đình
+activate ui
+ui -> router: 2. GET /api/bills (Query: year, month, status)
+activate router
+router -> db: 3. SELECT * FROM bills WHERE household_id = current_household ORDER BY created_at DESC
+activate db
+db --> router: 4. Danh sách hóa đơn
+deactivate db
+router --> ui: 5. HTTP 200 OK [bills]
+deactivate router
+
+user -> ui: 6. Nhấn vào một hóa đơn để xem chi tiết
+ui -> router: 7. GET /api/bills/{bill_id}
+activate router
+router -> db: 8. SELECT * FROM bills WHERE id = bill_id AND household_id = current_household
+activate db
+db --> router: 9. Bill detail snapshot
+deactivate db
+router --> ui: 10. HTTP 200 OK {bill, bill_detail_snapshot}
+deactivate router
+
+ui --> user: 11. Hiển thị phân rã số m3/kWh, tiền từng bậc giá và số tiền phải trả
+deactivate ui
+@enduml

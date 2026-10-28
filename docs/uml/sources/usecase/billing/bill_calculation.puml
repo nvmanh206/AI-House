@@ -1,0 +1,19 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Hệ thống (System)" as system <<System>>
+
+rectangle "Hệ thống Quản lý Hóa đơn Nhà Mình - Tính tiền Bậc thang" {
+    usecase "UC-BILL-CALCULATION\nTự động Tính tiền Bậc thang EVN/Nước" as UC_BillCalc
+    usecase "UC-APPLY-TIERED-TARIFF\nPhân rã Sản lượng & Nhân Đơn giá Decimal" as UC_ApplyTariff
+}
+
+system -- UC_BillCalc
+UC_BillCalc ..> UC_ApplyTariff : <<include>>
+@enduml

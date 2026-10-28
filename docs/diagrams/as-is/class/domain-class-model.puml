@@ -1,0 +1,124 @@
+@startuml
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+
+class User {
+    +String id
+    +String email
+    +String password_hash
+    +String full_name
+    +String role
+    +Boolean is_active
+    +DateTime created_at
+}
+
+class Household {
+    +String id
+    +String name
+    +String address
+    +String province
+    +Integer member_count
+    +String owner_user_id
+}
+
+class HouseholdMember {
+    +String id
+    +String household_id
+    +String user_id
+    +String role
+    +List permissions
+}
+
+class UtilityAccount {
+    +String id
+    +String household_id
+    +String utility_type
+    +String provider_name
+    +String customer_code
+    +Integer billing_day
+    +Integer due_day
+}
+
+class Meter {
+    +String id
+    +String household_id
+    +String utility_account_id
+    +String utility_type
+    +String unit
+    +Decimal initial_reading
+}
+
+class BillingPeriod {
+    +String id
+    +String household_id
+    +Integer year
+    +Integer month
+    +Date start_date
+    +Date end_date
+}
+
+class MeterReading {
+    +String id
+    +String meter_id
+    +String billing_period_id
+    +Decimal previous_reading
+    +Decimal current_reading
+    +Decimal consumption
+    +Date reading_date
+}
+
+class Tariff {
+    +String id
+    +String utility_type
+    +String provider_name
+    +String version
+    +String tariff_category
+    +Date effective_from
+}
+
+class TariffTier {
+    +String id
+    +String tariff_id
+    +Decimal from_value
+    +Decimal to_value
+    +Decimal unit_price
+    +Integer order_index
+}
+
+class Bill {
+    +String id
+    +String household_id
+    +String utility_account_id
+    +String billing_period_id
+    +String bill_code
+    +Decimal estimated_amount
+    +Decimal final_amount
+    +Date due_date
+    +String status
+    +Dict tariff_version_snapshot
+    +Dict bill_detail_snapshot
+}
+
+class Payment {
+    +String id
+    +String bill_id
+    +Decimal amount
+    +String method
+    +String status
+    +DateTime paid_at
+}
+
+User "1" -- "0..*" Household : owns
+User "1" -- "0..*" HouseholdMember
+Household "1" -- "0..*" HouseholdMember
+Household "1" -- "0..*" UtilityAccount
+Household "1" -- "0..*" Meter
+Household "1" -- "0..*" BillingPeriod
+UtilityAccount "1" -- "0..*" Meter
+UtilityAccount "1" -- "0..*" Bill
+Meter "1" -- "0..*" MeterReading
+BillingPeriod "1" -- "0..*" MeterReading
+BillingPeriod "1" -- "0..*" Bill
+Tariff "1" -- "1..*" TariffTier
+Bill "1" -- "0..1" Payment
+@enduml

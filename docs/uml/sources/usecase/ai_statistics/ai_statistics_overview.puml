@@ -1,0 +1,31 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Chủ hộ (Owner)" as owner
+actor "Thành viên (Member)" as member
+actor "Trợ lý AI (AI Assistant)" as aiAgent <<System>>
+
+rectangle "Phân hệ 5: Thống kê & Trợ lý Trí tuệ Nhân tạo AI (AI & Statistics)" {
+    usecase "UC-STATISTICS-ALERT\nTheo dõi Thống kê & Cảnh báo Tiêu thụ" as UC_StatAlert
+    usecase "UC-AI-CHATBOT\nHỏi đáp Trợ lý AI Agent" as UC_AIChatbot
+    usecase "UC-RAG-HYBRID-SEARCH\nTruy xuất Ngữ cảnh RAG" as UC_RAG
+    usecase "UC-AI-FORECAST-ANOMALY\nAI Dự báo WMA & Phát hiện Bất thường" as UC_AIForecast
+}
+
+owner -- UC_StatAlert
+member -- UC_StatAlert
+owner -- UC_AIChatbot
+member -- UC_AIChatbot
+UC_AIChatbot -- aiAgent
+aiAgent -- UC_AIForecast
+UC_AIForecast -- owner
+UC_AIForecast -- member
+
+UC_AIChatbot ..> UC_RAG : <<include>>
+@enduml

@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import inspect
 from app.models import *
 from app.security import DomainError, household_context, hasher, verify, issue, today, day_in_month
-from app.billing_service import BillingService
+from app.billing_service import BillingService, calculate_tiers
 from app.anomaly_service import AnomalyService
 from app.notification_service import NotificationService
 from app.providers.payment import ManualPaymentProvider
@@ -21,8 +21,15 @@ def public(item):
 class AuthService:
     def __init__(self,repo): self.repo=repo
     def register(self,data):
+        from app.config import settings
+        first_admin=False
+        if settings.bootstrap_first_user_admin and settings.app_env=='development':
+            from sqlalchemy import text
+            if self.repo.db.bind.dialect.name=='postgresql':self.repo.db.execute(text('SELECT pg_advisory_xact_lock(7410829)'))
+            first_admin=not self.repo.all(User)
         if self.repo.one(User,email=data.email.lower()): raise DomainError('EMAIL_EXISTS','Email đã được sử dụng.',409)
         user=self.repo.add(User,email=data.email.lower(),full_name=data.full_name,password_hash=hasher.hash(data.password))
+        if first_admin:user.role='ADMIN'
         self.repo.audit(user.id,None,'REGISTER',user)
         return issue(self.repo,user)
     def login(self,data):
@@ -102,29 +109,157 @@ class HouseholdService:
         self.repo.audit(self.auth[0].id,item.household_id,'SAVE_METER',item)
         return public(item)
     def history(self):
-        return [{**public(r),'utility_type':m.utility_type,'unit':m.unit,'period':f'{p.year}-{p.month:02}'} for r,m,p in self.repo.readings(self.member().household_id)]
-    def reading(self,data):
-        meter=self.scope(Meter,data.meter_id,'write',lock=True)
-        if not meter.is_active: raise DomainError('METER_DISABLED','Công tơ đã ngừng hoạt động.')
-        if data.reading_date>today(): raise DomainError('FUTURE_READING','Không nhập chỉ số trong tương lai.')
-        account=self.repo.get(UtilityAccount,meter.utility_account_id,lock=True)
-        history=[(r,p) for r,m,p in self.repo.readings(meter.household_id) if m.id==meter.id]
-        if history and (data.year,data.month)<=(history[-1][1].year,history[-1][1].month):
-            raise DomainError('DUPLICATE_OR_OLD_PERIOD','Chỉ nhập kỳ mới sau kỳ gần nhất.',409)
-        previous=history[-1][0].current_reading if history else meter.initial_reading
-        if data.current_reading<previous: raise DomainError('INVALID_METER_READING','Chỉ số mới không được nhỏ hơn chỉ số trước.')
-        # Serialize period creation across accounts in one household.
-        self.repo.get(Household,meter.household_id,lock=True)
-        period=self.repo.one(BillingPeriod,household_id=meter.household_id,year=data.year,month=data.month)
-        if not period: period=self.repo.add(BillingPeriod,household_id=meter.household_id,year=data.year,month=data.month,start_date=date(data.year,data.month,1),end_date=day_in_month(data.year,data.month,31))
-        reading=self.repo.add(MeterReading,meter_id=meter.id,billing_period_id=period.id,previous_reading=previous,current_reading=data.current_reading,consumption=data.current_reading-previous,reading_date=data.reading_date,created_by=self.auth[0].id)
-        bill=BillingService(self.repo).create(meter.household_id,account,period,reading)
-        anomaly=AnomalyService.detect(reading.consumption,[r.consumption for r,p in history])
-        notifications=NotificationService(self.repo)
-        notifications.emit(meter.household_id,'BILL_CREATED',f'bill:{bill.id}','Đã tạo hóa đơn ước tính',f'Kỳ {data.month}/{data.year}: {bill.final_amount:,.0f} VND.')
-        if anomaly['is_anomaly']: notifications.emit(meter.household_id,'ABNORMAL_CONSUMPTION',f'anomaly:{reading.id}','Tiêu thụ tăng bất thường',f'Tăng {anomaly["deviation_percent"]}% so với trung bình các kỳ trước.')
-        self.repo.audit(self.auth[0].id,meter.household_id,'CREATE_READING',reading)
-        return {'reading':public(reading),'bill':public(bill),'anomaly':anomaly}
+        return [{**public(r),'utility_type':m.utility_type,'meter_name':m.name,'unit':m.unit,'period':f'{p.year}-{p.month:02}'} for r,m,p in self.repo.readings(self.member().household_id)]
+
+    def _cascade_update_next(self, account, next_reading, next_period, new_previous):
+        if next_reading.current_reading < new_previous:
+            raise DomainError('INVALID_METER_READING', f'Chỉ số kỳ sau ({next_reading.current_reading}) không được nhỏ hơn chỉ số kỳ này ({new_previous}).')
+        next_reading.previous_reading = new_previous
+        next_reading.consumption = next_reading.current_reading - new_previous
+        bill = self.repo.one(Bill, utility_account_id=account.id, billing_period_id=next_period.id)
+        if bill:
+            tariff, tiers = BillingService(self.repo).tariff(account, next_period.end_date)
+            amount, lines = calculate_tiers(next_reading.consumption, tiers)
+            bill.consumption = next_reading.consumption
+            bill.estimated_amount = amount
+            bill.final_amount = amount
+            bill.bill_detail_snapshot = {**bill.bill_detail_snapshot, 'tiers': lines, 'previous_reading': str(next_reading.previous_reading), 'current_reading': str(next_reading.current_reading)}
+
+    def reading(self, data):
+        meter = self.scope(Meter, data.meter_id, 'write', lock=True)
+        if not meter.is_active: raise DomainError('METER_DISABLED', 'Công tơ đã ngừng hoạt động.')
+        if data.reading_date > today(): raise DomainError('FUTURE_READING', 'Không nhập chỉ số trong tương lai.')
+        account = self.repo.get(UtilityAccount, meter.utility_account_id, lock=True)
+
+        self.repo.get(Household, meter.household_id, lock=True)
+        period = self.repo.one(BillingPeriod, household_id=meter.household_id, year=data.year, month=data.month)
+
+        # Check if bill for this account and period already exists
+        if period and self.repo.one(Bill, utility_account_id=account.id, billing_period_id=period.id):
+            raise DomainError('DUPLICATE_PERIOD', 'Kỳ này đã có chỉ số và hóa đơn. Vui lòng dùng chức năng Sửa trong lịch sử nếu muốn điều chỉnh.', 409)
+
+        # Check if reading for this meter and period already exists
+        if period and self.repo.one(MeterReading, meter_id=meter.id, billing_period_id=period.id):
+            raise DomainError('DUPLICATE_PERIOD', 'Kỳ này đã có chỉ số. Vui lòng dùng chức năng Sửa trong lịch sử nếu muốn điều chỉnh.', 409)
+
+        history = [(r, p) for r, m, p in self.repo.readings(meter.household_id) if m.id == meter.id]
+        prev_item = next(((r, p) for r, p in reversed(history) if (p.year, p.month) < (data.year, data.month)), None)
+        previous = prev_item[0].current_reading if prev_item else meter.initial_reading
+        next_item = next(((r, p) for r, p in history if (p.year, p.month) > (data.year, data.month)), None)
+
+        if data.current_reading < previous:
+            raise DomainError('INVALID_METER_READING', f'Chỉ số mới ({data.current_reading}) không được nhỏ hơn chỉ số kỳ trước ({previous}).')
+        if next_item and data.current_reading > next_item[0].current_reading:
+            raise DomainError('INVALID_METER_READING', f'Không thể ghi kỳ {data.month:02}/{data.year}: chỉ số {data.current_reading} lớn hơn chỉ số kỳ {next_item[1].month:02}/{next_item[1].year} đã ghi ({next_item[0].current_reading}). Hãy kiểm tra lại chỉ số hai kỳ; chỉ số kỳ trước không được lớn hơn kỳ sau.')
+
+        if not period:
+            period = self.repo.add(BillingPeriod, household_id=meter.household_id, year=data.year, month=data.month, start_date=date(data.year, data.month, 1), end_date=day_in_month(data.year, data.month, 31))
+
+        reading = self.repo.add(MeterReading, meter_id=meter.id, billing_period_id=period.id, previous_reading=previous, current_reading=data.current_reading, consumption=data.current_reading - previous, reading_date=data.reading_date, created_by=self.auth[0].id)
+        bill = None
+        try:
+            bill = BillingService(self.repo).create(meter.household_id, account, period, reading)
+        except DomainError as exc:
+            if exc.code != 'TARIFF_NOT_FOUND': raise
+
+        if next_item:
+            self._cascade_update_next(account, next_item[0], next_item[1], reading.current_reading)
+
+        anomaly = AnomalyService.detect(reading.consumption, [r.consumption for r, p in history if r.id != reading.id])
+        notifications = NotificationService(self.repo)
+        if bill:
+            notifications.emit(meter.household_id, 'BILL_CREATED', f'bill:{bill.id}', 'Đã tạo hóa đơn ước tính', f'Kỳ {data.month}/{data.year}: {bill.final_amount:,.0f} VND.')
+        if anomaly['is_anomaly']:
+            notifications.emit(meter.household_id, 'ABNORMAL_CONSUMPTION', f'anomaly:{reading.id}', 'Tiêu thụ tăng bất thường', f'Tăng {anomaly["deviation_percent"]}% so với trung bình các kỳ trước.')
+        self.repo.audit(self.auth[0].id, meter.household_id, 'CREATE_READING', reading)
+        return {'reading': public(reading), 'bill': public(bill) if bill else None, 'anomaly': anomaly,
+                'billing_status': 'CREATED' if bill else 'TARIFF_NOT_FOUND'}
+
+    def generate_bills(self):
+        member=self.member('write')
+        created=[];skipped=[]
+        for reading,meter,period in self.repo.readings(member.household_id):
+            account=self.repo.get(UtilityAccount,meter.utility_account_id,lock=True)
+            if self.repo.one(Bill,utility_account_id=account.id,billing_period_id=period.id):continue
+            try:
+                bill=BillingService(self.repo).create(member.household_id,account,period,reading)
+            except DomainError as exc:
+                if exc.code not in ('TARIFF_NOT_FOUND','TARIFF_AMBIGUOUS'):raise
+                skipped.append({'reading_id':reading.id,'period':f'{period.year}-{period.month:02}','provider':account.provider_name,'code':exc.code,'message':exc.message})
+                continue
+            self.repo.audit(self.auth[0].id,member.household_id,'GENERATE_BILL_FROM_READING',bill)
+            created.append(public(bill))
+        return {'created':created,'skipped':skipped}
+
+    def update_reading(self, id, data):
+        reading = self.repo.get(MeterReading, id, lock=True)
+        if not reading: raise DomainError('NOT_FOUND', 'Không tìm thấy bản ghi chỉ số.', 404)
+        meter = self.scope(Meter, reading.meter_id, 'write', lock=True)
+        period = self.repo.get(BillingPeriod, reading.billing_period_id)
+        account = self.repo.get(UtilityAccount, meter.utility_account_id, lock=True)
+
+        bill = self.repo.one(Bill, utility_account_id=account.id, billing_period_id=period.id)
+        if bill and (bill.status == 'PAID' or self.repo.one(Payment, bill_id=bill.id)):
+            raise DomainError('BILL_PAID', 'Không thể sửa chỉ số của kỳ đã thanh toán hóa đơn.', 400)
+
+        history = [(r, p) for r, m, p in self.repo.readings(meter.household_id) if m.id == meter.id]
+        prev_item = next(((r, p) for r, p in reversed(history) if (p.year, p.month) < (period.year, period.month)), None)
+        previous = prev_item[0].current_reading if prev_item else meter.initial_reading
+        next_item = next(((r, p) for r, p in history if (p.year, p.month) > (period.year, period.month)), None)
+
+        if data.current_reading < previous:
+            raise DomainError('INVALID_METER_READING', f'Chỉ số mới ({data.current_reading}) không được nhỏ hơn chỉ số kỳ trước ({previous}).')
+        if next_item and data.current_reading > next_item[0].current_reading:
+            raise DomainError('INVALID_METER_READING', f'Chỉ số mới ({data.current_reading}) không được lớn hơn chỉ số kỳ sau ({next_item[0].current_reading}).')
+
+        reading.previous_reading = previous
+        reading.current_reading = data.current_reading
+        reading.consumption = data.current_reading - previous
+        if data.reading_date:
+            if (data.reading_date.year, data.reading_date.month) != (period.year, period.month):
+                raise DomainError('INVALID_DATE', 'Ngày ghi phải thuộc kỳ hóa đơn.', 422)
+            if data.reading_date > today():
+                raise DomainError('FUTURE_READING', 'Không nhập chỉ số trong tương lai.', 400)
+            reading.reading_date = data.reading_date
+
+        if bill:
+            tariff, tiers = BillingService(self.repo).tariff(account, period.end_date)
+            amount, lines = calculate_tiers(reading.consumption, tiers)
+            bill.consumption = reading.consumption
+            bill.estimated_amount = amount
+            bill.final_amount = amount
+            bill.bill_detail_snapshot = {**bill.bill_detail_snapshot, 'tiers': lines, 'previous_reading': str(reading.previous_reading), 'current_reading': str(reading.current_reading)}
+
+        if next_item:
+            self._cascade_update_next(account, next_item[0], next_item[1], reading.current_reading)
+
+        self.repo.audit(self.auth[0].id, meter.household_id, 'UPDATE_READING', reading)
+        return {'reading': public(reading), 'bill': public(bill) if bill else None}
+
+    def delete_reading(self, id):
+        reading = self.repo.get(MeterReading, id, lock=True)
+        if not reading: raise DomainError('NOT_FOUND', 'Không tìm thấy bản ghi chỉ số.', 404)
+        meter = self.scope(Meter, reading.meter_id, 'write', lock=True)
+        period = self.repo.get(BillingPeriod, reading.billing_period_id)
+        account = self.repo.get(UtilityAccount, meter.utility_account_id, lock=True)
+
+        bill = self.repo.one(Bill, utility_account_id=account.id, billing_period_id=period.id)
+        if bill:
+            if bill.status == 'PAID' or self.repo.one(Payment, bill_id=bill.id):
+                raise DomainError('BILL_PAID', 'Không thể xóa chỉ số của kỳ đã thanh toán hóa đơn.', 400)
+            self.repo.delete(bill)
+
+        history = [(r, p) for r, m, p in self.repo.readings(meter.household_id) if m.id == meter.id]
+        prev_item = next(((r, p) for r, p in reversed(history) if (p.year, p.month) < (period.year, period.month)), None)
+        previous = prev_item[0].current_reading if prev_item else meter.initial_reading
+        next_item = next(((r, p) for r, p in history if (p.year, p.month) > (period.year, period.month)), None)
+
+        if next_item:
+            self._cascade_update_next(account, next_item[0], next_item[1], previous)
+
+        self.repo.delete(reading)
+        self.repo.audit(self.auth[0].id, meter.household_id, 'DELETE_READING', reading)
+        return {'ok': True}
     def bills(self):
         result=[]
         for b in self.repo.all(Bill,household_id=self.member().household_id):
@@ -155,11 +290,19 @@ class HouseholdService:
         for r in history:
             year,month=map(int,r['period'].split('-'))
             if (first.year,first.month)<=(year,month)<=(last.year,last.month):
-                row=rows.setdefault(r['period'],{'period':r['period'],'ELECTRICITY':None,'WATER':None,'cost':None})
+                row=rows.setdefault(r['period'],{'period':r['period'],'ELECTRICITY':None,'WATER':None,'ELECTRICITY_COST':None,'WATER_COST':None,'cost':None})
                 row[r['utility_type']]=(row[r['utility_type']] or 0)+float(r['consumption'])
         for b in self.bills():
-            if b['period'] in rows and b['status']!='CANCELLED': rows[b['period']]['cost']=(rows[b['period']]['cost'] or 0)+float(b['final_amount'])
+            if b['period'] in rows and b['status']!='CANCELLED':
+                row=rows[b['period']]
+                amount=Decimal(b['final_amount'])
+                row['cost']=(row['cost'] or Decimal(0))+amount
+                key=b['utility_type']+'_COST'
+                row[key]=(row[key] or Decimal(0))+amount
         series=[rows[k] for k in sorted(rows)]
+        for row in series:
+            for key in ('cost','ELECTRICITY_COST','WATER_COST'):
+                if row[key] is not None: row[key]=float(row[key])
         summaries={}
         for key in ('ELECTRICITY','WATER','cost'):
             values=[r[key] for r in series if r[key] is not None]

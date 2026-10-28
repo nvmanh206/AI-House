@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Context>
+
+TITLE C4 System Context Diagram - Hệ thống Quản lý Hóa đơn Điện Nước (Nhà Mình)
+
+Person(user, "Người dùng / Chủ hộ", "Quản lý chỉ số, hóa đơn điện nước và hỏi đáp với AI Assistant.")
+Person(admin, "Quản trị viên (Admin)", "Quản lý danh sách người dùng, cấu hình biểu giá bậc thang điện/nước.")
+
+System(system, "Hệ thống Nhà Mình (Household Utility Billing)", "Hệ thống web quản lý hóa đơn, tính tiền bậc thang, dự báo chi tiêu và trợ lý AI.")
+
+System_Ext(gemini, "Google Gemini API (Google AI Studio)", "Cung cấp khả năng tra cứu biểu giá công cộng online qua Google Search Grounding.")
+System_Ext(evn, "Cổng thông tin Điện lực EVN / Nước sạch", "Nguồn tra cứu biểu giá điện nước công cộng sinh hoạt.")
+
+Rel(user, system, "Sử dụng giao diện Web SPA", "HTTPS / JSON")
+Rel(admin, system, "Quản trị & Cấu hình biểu giá", "HTTPS / JSON")
+Rel(system, gemini, "Gửi truy vấn tra cứu biểu giá online", "HTTPS REST API / JSON")
+Rel(gemini, evn, "Tra cứu dữ liệu biểu giá công cộng", "Google Search")
+
+@enduml

@@ -1,0 +1,56 @@
+@startuml
+!pragma layout smetana
+autonumber
+actor "Chủ hộ (User)" as User
+participant "Next.js UI\n(frontend/components/application.tsx)" as UI
+participant "FastAPI Main\n(backend/app/main.py)" as Main
+participant "HouseholdService\n(backend/app/services.py)" as Service
+participant "BillingService\n(backend/app/billing_service.py)" as Billing
+participant "Repository\n(backend/app/repository.py)" as Repo
+database "PostgreSQL DB" as DB
+
+User -> UI: Nhập chỉ số công tơ mới (current_reading, reading_date)
+UI -> Main: POST /api/readings\n{meter_id, current_reading, reading_date}
+activate Main
+
+Main -> Service: reading(data)
+activate Service
+
+Service -> Repo: get(Meter, meter_id)
+activate Repo
+Repo -> DB: SELECT * FROM meters WHERE id = meter_id
+Repo --> Service: meter
+deactivate Repo
+
+Service -> Service: Validate current_reading >= previous_reading
+Service -> Service: Calculate consumption = current_reading - previous_reading
+
+Service -> Repo: add(MeterReading, previous, current, consumption)
+activate Repo
+Repo -> DB: INSERT INTO meter_readings (...)
+Repo --> Service: reading
+deactivate Repo
+
+Service -> Billing: create(household_id, account, period, reading)
+activate Billing
+
+Billing -> Billing: tariff(account, period.end_date)\nFind matching Tariff & TariffTiers
+Billing -> Billing: calculate_tiers(consumption, tiers)\nCalculate tier breakdown & total amount
+
+Billing -> Repo: add(Bill, estimated_amount, final_amount, snapshots)
+activate Repo
+Repo -> DB: INSERT INTO bills (...)
+Repo --> Billing: bill
+deactivate Repo
+
+Billing --> Service: bill
+deactivate Billing
+
+Service --> Main: MeterReading & Bill JSON
+deactivate Service
+
+Main --> UI: 201 Created {reading, bill}
+deactivate Main
+
+UI --> User: Hiển thị chỉ số đã lưu & Hóa đơn phát hành thành công
+@enduml

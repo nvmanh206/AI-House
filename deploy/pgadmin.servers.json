@@ -1,0 +1,1 @@
+{"Servers":{"1":{"Name":"Nhà Mình - ứng dụng","Group":"Nhà Mình","Host":"postgres","Port":5432,"MaintenanceDB":"utility","Username":"utility","SSLMode":"prefer"},"2":{"Name":"Nhà Mình - kho tri thức","Group":"Nhà Mình","Host":"knowledge-postgres","Port":5432,"MaintenanceDB":"knowledge","Username":"knowledge","SSLMode":"prefer"}}}

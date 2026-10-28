@@ -1,0 +1,19 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Chủ hộ (Owner)" as owner
+actor "Thành viên (Member)" as member
+
+rectangle "Hệ thống Quản lý Hóa đơn Nhà Mình - Ghi nhận Thanh toán" {
+    usecase "UC-PAYMENT-ENTRY\nGhi nhận Thanh toán Hóa đơn Thủ công (PAID)" as UC_PaymentEntry
+}
+
+owner -- UC_PaymentEntry
+member -- UC_PaymentEntry
+@enduml

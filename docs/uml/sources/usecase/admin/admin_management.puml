@@ -1,0 +1,21 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Quản trị viên (Admin)" as admin
+
+rectangle "Phân hệ 6: Quản trị Hệ thống (Admin)" {
+    usecase "UC-ADMIN-USER-MGMT\nQuản lý Tài khoản (Khóa/Mở khóa User)" as UC_AdminUser
+    usecase "UC-ADMIN-TARIFF-CONFIG\nCấu hình Biểu giá Điện/Nước Bậc thang" as UC_AdminTariff
+    usecase "UC-ADMIN-AUDIT-LOG\nTra cứu Nhật ký Hệ thống Audit Log" as UC_AdminAudit
+}
+
+admin -- UC_AdminUser
+admin -- UC_AdminTariff
+admin -- UC_AdminAudit
+@enduml

@@ -1,0 +1,38 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "System Event / Trigger" as sys
+participant "BillingService" as service
+database "PostgreSQL\n(tariffs & tariff_tiers)" as db
+database "PostgreSQL\n(bills & bill_details)" as db_bills
+
+title Sơ đồ Trình tự UC-BILL-CALCULATION: Tự động tính tiền bậc thang
+
+sys -> service: 1. calculate_bill(household_id, account_id, consumption)
+activate service
+
+service -> db: 2. SELECT * FROM tariffs WHERE utility_type = ? AND is_active = True
+activate db
+db --> service: 3. Tariff Active Version
+deactivate db
+
+service -> db: 4. SELECT * FROM tariff_tiers WHERE tariff_id = ? ORDER BY order_index
+activate db
+db --> service: 5. Danh sách các bậc giá (Bậc 1 -> Bậc 6)
+deactivate db
+
+service -> service: 6. Phân rã sản lượng C (DECIMAL) qua từng bậc giá (calculate_tiers)
+service -> service: 7. Tính tổng tiền trước thuế = SUM(sản lượng bậc * đơn giá)
+service -> service: 8. Cộng VAT (8%/10%) + Phí môi trường (nếu có nước)
+
+service -> db_bills: 9. INSERT INTO bills (household_id, bill_code, consumption, final_amount, status='UNPAID', bill_detail_snapshot)
+activate db_bills
+db_bills --> service: 10. Bill record vừa tạo (id, final_amount)
+deactivate db_bills
+
+service --> sys: 11. Hóa đơn mới được khởi tạo hoàn tất
+deactivate service
+@enduml

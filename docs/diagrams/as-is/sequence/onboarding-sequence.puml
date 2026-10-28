@@ -1,0 +1,57 @@
+@startuml
+!pragma layout smetana
+autonumber
+actor "Chủ hộ (User)" as User
+participant "Next.js Application\n(frontend/components/application.tsx)" as UI
+participant "FastAPI Main Controller\n(backend/app/main.py)" as Main
+participant "HouseholdService\n(backend/app/services.py)" as Service
+participant "Repository\n(backend/app/repository.py)" as Repo
+database "PostgreSQL DB" as DB
+
+User -> UI: Điền Form Onboarding 4 Bước (Tên hộ, Địa chỉ, Tài khoản Điện/Nước)
+UI -> Main: POST /api/households\n{name, address, member_count, accounts}
+activate Main
+
+Main -> Service: onboard(data)
+activate Service
+
+Service -> Repo: add(Household, owner_user_id=auth.user.id)
+activate Repo
+Repo -> DB: INSERT INTO households (...)
+Repo --> Service: household
+deactivate Repo
+
+Service -> Repo: add(HouseholdMember, role='OWNER')
+activate Repo
+Repo -> DB: INSERT INTO household_members (...)
+Repo --> Service: member
+deactivate Repo
+
+loop Với mỗi tài khoản trong accounts (Điện / Nước)
+    Service -> Repo: add(UtilityAccount, provider_name, tariff_category, billing_day, due_day)
+    activate Repo
+    Repo -> DB: INSERT INTO utility_accounts (...)
+    Repo --> Service: account
+    deactivate Repo
+
+    Service -> Repo: add(Meter, utility_account_id, initial_reading)
+    activate Repo
+    Repo -> DB: INSERT INTO meters (...)
+    Repo --> Service: meter
+    deactivate Repo
+end
+
+Service -> Repo: audit(user_id, household_id, action='CREATE_HOUSEHOLD')
+activate Repo
+Repo -> DB: INSERT INTO audit_logs (...)
+Repo --> Service: audit_log
+deactivate Repo
+
+Service --> Main: Household JSON Payload
+deactivate Service
+
+Main --> UI: 201 Created {id, name, accounts}
+deactivate Main
+
+UI --> User: Hiển thị thông báo thành công & Chuyển sang Dashboard
+@enduml

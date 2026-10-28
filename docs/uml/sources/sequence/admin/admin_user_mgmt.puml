@@ -1,0 +1,42 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Admin (Quản trị viên)" as admin
+participant "Web UI (/admin/users)" as ui
+participant "FastAPI Router\n(GET & PATCH /api/admin/users)" as router
+database "PostgreSQL\n(users & audit_logs)" as db
+
+title Sơ đồ Trình tự UC-ADMIN-USER-MGMT: Quản lý người dùng Admin
+
+admin -> ui: 1. Mở trang Quản lý Người dùng
+activate ui
+ui -> router: 2. GET /api/admin/users
+activate router
+
+router -> db: 3. SELECT id, email, full_name, role, is_active FROM users ORDER BY created_at DESC
+activate db
+db --> router: 4. Danh sách tài khoản người dùng
+deactivate db
+
+router --> ui: 5. HTTP 200 OK [users]
+deactivate router
+
+admin -> ui: 6. Nhấn "Khóa tài khoản" hoặc "Mở khóa" trên dòng người dùng
+ui -> router: 7. PATCH /api/admin/users/{user_id} {is_active: false}
+activate router
+
+router -> db: 8. UPDATE users SET is_active = False WHERE id = user_id
+router -> db: 9. INSERT INTO audit_logs (user_id, action='LOCK_USER', metadata={target: user_id})
+activate db
+db --> router: 10. OK
+deactivate db
+
+router --> ui: 11. HTTP 200 OK {user_id, is_active: false}
+deactivate router
+
+ui --> admin: 12. Cập nhật nhãn trạng thái người dùng trên màn hình Quản trị
+deactivate ui
+@enduml

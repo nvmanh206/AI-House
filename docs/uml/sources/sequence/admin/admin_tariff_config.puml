@@ -1,0 +1,36 @@
+@startuml
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam defaultFontSize 13
+skinparam dpi 180
+
+actor "Admin (Quản trị viên)" as admin
+participant "Web UI (/admin/tariffs)" as ui
+participant "FastAPI Router\n(POST /api/admin/tariffs)" as router
+database "PostgreSQL\n(tariffs & tariff_tiers)" as db
+
+title Sơ đồ Trình tự UC-ADMIN-TARIFF-CONFIG: Cấu hình biểu giá bậc thang
+
+admin -> ui: 1. Nhập Tên biểu giá (VD: QĐ 2699 EVN), Loại tiện ích & Đơn giá từng bậc
+admin -> ui: 2. Bấm "Cấu hình Biểu giá Mới"
+activate ui
+ui -> router: 3. POST /api/admin/tariffs {utility_type, name, tiers: [...]}
+activate router
+
+router -> db: 4. UPDATE tariffs SET is_active = False WHERE utility_type = ?
+router -> db: 5. INSERT INTO tariffs (utility_type, name, is_active=True) RETURNING id
+activate db
+db --> router: 6. tariff_id mới
+deactivate db
+
+router -> db: 7. INSERT INTO tariff_tiers (tariff_id, from_value, to_value, unit_price, order_index)
+activate db
+db --> router: 8. Tiers inserted OK
+deactivate db
+
+router --> ui: 9. HTTP 200 OK {tariff_id, status: "ACTIVATED"}
+deactivate router
+
+ui --> admin: 10. Hiển thị thông báo biểu giá mới đã được áp dụng toàn hệ thống
+deactivate ui
+@enduml

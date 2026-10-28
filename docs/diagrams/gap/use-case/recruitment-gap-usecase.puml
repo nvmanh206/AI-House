@@ -1,0 +1,28 @@
+@startuml
+!pragma layout smetana
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Ứng viên (Candidate) [Proposed]" as Candidate
+actor "HR Specialist [Proposed]" as HR
+actor "Interviewer [Proposed]" as Interviewer
+
+rectangle "Module Tuyển Dụng Nội Bộ (BLOCKED GAP - CHƯA CÓ TRONG CODEBASE)" {
+    usecase "UC-GAP-01: Tạo & Duyệt Yêu cầu tuyển dụng (Job Requisition)" as GAP01
+    usecase "UC-GAP-02: Ứng tuyển & Quản lý Hồ sơ CV" as GAP02
+    usecase "UC-GAP-03: Lập lịch & Đánh giá Phỏng vấn" as GAP03
+    usecase "UC-GAP-04: Phát hành Thư mời nhận việc (Offer Letter)" as GAP04
+}
+
+Candidate --> GAP02
+HR --> GAP01
+HR --> GAP02
+HR --> GAP04
+Interviewer --> GAP03
+
+note bottom of GAP01
+  ⚠️ BLOCKED GAP:
+  Không tìm thấy nguồn yêu cầu / mã nguồn cho Hệ thống Tuyển dụng trong project này.
+  Dữ liệu hiện tại của project là Hệ thống Quản lý Hóa đơn Điện Nước Hộ Gia Đình.
+end note
+@enduml

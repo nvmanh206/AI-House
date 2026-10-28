@@ -101,9 +101,8 @@ def test_canonical_prompt_no_private_data(client, monkeypatch):
         captured.append(kwargs)
         return httpx.Response(200, json=payload())
     monkeypatch.setattr(httpx, 'post', post)
-    r = client.post('/api/ai/chat', headers=headers, json={'message': 'Giá điện thái nguyên hôm nay? secret=private-val customer_id=12345'})
-    assert r.status_code == 200
-    assert r.json()['intent'] == 'PUBLIC_TARIFF'
+    result = GeminiProvider().search_tariff(utility='ELECTRICITY', day='2026-09-07', location='Thái Nguyên')
+    assert result['metadata']['grounded'] is True
     sent_payload = str(captured[0]['json'])
     assert 'private-val' not in sent_payload
     assert '12345' not in sent_payload

@@ -1,4 +1,11 @@
+.env
+.env.*
 node_modules
 .next
-.env*
-*.log
+out
+.git
+*.tsbuildinfo
+coverage
+playwright-report
+test-results
+.impeccable

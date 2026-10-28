@@ -1,0 +1,26 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 70
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam dpi 180
+
+actor "Chủ hộ (Owner)" as owner
+actor "Thành viên (Member)" as member
+actor "Hệ thống (System)" as system <<System>>
+
+rectangle "Hệ thống Quản lý Hóa đơn Nhà Mình - Nhập Chỉ số" {
+    usecase "UC-READING-ENTRY\nGhi nhận Chỉ số Công tơ Hàng tháng" as UC_ReadingEntry
+    usecase "UC-VALIDATE-READING\nKiểm tra Chỉ số Hợp lệ (Current >= Previous)" as UC_ValidateReading
+    usecase "UC-BILL-CALCULATION\nTự động Tính tiền Bậc thang EVN/Nước" as UC_BillCalc
+}
+
+owner -- UC_ReadingEntry
+member -- UC_ReadingEntry
+UC_BillCalc -- system
+
+UC_ReadingEntry ..> UC_ValidateReading : <<include>>
+UC_ReadingEntry ..> UC_BillCalc : <<include>>
+@enduml

@@ -1,6 +1,6 @@
 from decimal import Decimal, ROUND_HALF_UP
 from app.security import DomainError, day_in_month
-from app.models import Tariff, TariffTier, Household, Bill
+from app.models import Tariff, TariffTier, Household, Bill, AuditLog
 
 def calculate_tiers(consumption, tiers):
     consumption = Decimal(consumption)
@@ -35,26 +35,20 @@ class BillingService:
         if not matches:
             matches = [t for t in active if t.provider_name == account.provider_name and getattr(t, 'tariff_category', 'RESIDENTIAL_1PHASE') == account_category and not t.province]
 
-        # Level 3: Match provider_name + default category ('RESIDENTIAL_1PHASE' or 'RESIDENTIAL')
+        # Never substitute a different provider, customer category or region.
         if not matches:
-            default_cat = 'RESIDENTIAL_1PHASE' if account.utility_type == 'ELECTRICITY' else 'RESIDENTIAL'
-            matches = [t for t in active if t.provider_name == account.provider_name and getattr(t, 'tariff_category', 'RESIDENTIAL_1PHASE') == default_cat]
+            raise DomainError('TARIFF_NOT_FOUND', 'Chưa có biểu giá phù hợp. Hãy nhờ quản trị viên cấu hình.', 409)
+        if len(matches) > 1:
+            raise DomainError('TARIFF_AMBIGUOUS', 'Có nhiều biểu giá cùng phạm vi và thời gian hiệu lực. Hãy nhờ quản trị viên kiểm tra cấu hình.', 409)
 
-        # Level 4: Match provider_name regardless of category/province
-        if not matches:
-            matches = [t for t in active if t.provider_name == account.provider_name]
-
-        # Level 5: Ultimate fallback to any active tariff for the utility_type if provider name differs
-        if not matches:
-            matches = active
-
-        tariff = max(matches, key=lambda t: (t.effective_from, t.created_at))
+        tariff = matches[0]
         tiers = sorted(self.repo.all(TariffTier, tariff_id=tariff.id), key=lambda t: t.order_index)
         return tariff, tiers
     def create(self,household,account,period,reading):
         if self.repo.one(Bill,utility_account_id=account.id,billing_period_id=period.id):
             raise DomainError('DUPLICATE_BILL','Tài khoản đã có hóa đơn trong kỳ này.',409)
         tariff,tiers = self.tariff(account,period.end_date)
+        evidence=self.repo.one(AuditLog,entity_id=tariff.id,action='VERIFY_TARIFF_SOURCE')
         amount,lines = calculate_tiers(reading.consumption,tiers)
         due = day_in_month(period.year,period.month,account.due_day)
         if due < reading.reading_date:
@@ -63,5 +57,5 @@ class BillingService:
         return self.repo.add(Bill,household_id=household,utility_account_id=account.id,billing_period_id=period.id,
             bill_code=f'{period.year}{period.month:02}-{account.id[:8]}',consumption=reading.consumption,
             estimated_amount=amount,final_amount=amount,due_date=due,
-            tariff_version_snapshot={'id':tariff.id,'version':tariff.version,'name':tariff.name,'effective_from':str(tariff.effective_from)},
+            tariff_version_snapshot={'id':tariff.id,'version':tariff.version,'name':tariff.name,'effective_from':str(tariff.effective_from),'source':evidence.details if evidence else None},
             bill_detail_snapshot={'tiers':lines,'previous_reading':str(reading.previous_reading),'current_reading':str(reading.current_reading),'reading_source':reading.source,'due_date_source':'CONFIGURED_ESTIMATE','tax_note':'Chưa gồm thuế/phí; biểu giá do quản trị viên cấu hình.'})

@@ -34,13 +34,13 @@ export function StatisticsPage() {
   const query = custom && start && end ? `start=${start}&end=${end}` : `months=${custom ? '6' : months}`;
   const { data, error, loading } = useData(['/statistics?' + query]);
 
-  if (error || loading) return <LoadState error={error} loading={loading} />;
+  if (error || (loading && (!data || !data.length))) return <LoadState error={error} loading={loading} />;
 
   const statData = data[0];
   const summary = statData?.summary || {
-    ELECTRICITY: { average: 300, lowest: 280, highest: 320 },
-    WATER: { average: 10, lowest: 8, highest: 14 },
-    cost: { average: 673200, lowest: 520000, highest: 673200 },
+    ELECTRICITY: { average: null, lowest: null, highest: null },
+    WATER: { average: null, lowest: null, highest: null },
+    cost: { average: null, lowest: null, highest: null },
   };
   const series = statData?.series || [];
   const note = statData?.note || 'Biểu đồ tính dựa trên chỉ số công tơ ghi nhận hàng tháng.';

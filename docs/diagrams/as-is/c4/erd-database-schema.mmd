@@ -1,0 +1,140 @@
+erDiagram
+    users {
+        string id PK
+        string email UK
+        string password_hash
+        string full_name
+        string role
+        boolean is_active
+        datetime created_at
+    }
+
+    households {
+        string id PK
+        string name
+        string address
+        string province
+        integer member_count
+        string owner_user_id FK
+    }
+
+    household_members {
+        string id PK
+        string household_id FK
+        string user_id FK
+        string role
+        json permissions
+    }
+
+    auth_sessions {
+        string id PK
+        string user_id FK
+        string household_id FK
+        string refresh_hash
+        datetime expires_at
+        boolean revoked
+    }
+
+    utility_accounts {
+        string id PK
+        string household_id FK
+        string utility_type
+        string provider_name
+        string customer_code
+        integer billing_day
+        integer due_day
+    }
+
+    meters {
+        string id PK
+        string household_id FK
+        string utility_account_id FK
+        string utility_type
+        string unit
+        decimal initial_reading
+    }
+
+    billing_periods {
+        string id PK
+        string household_id FK
+        integer year
+        integer month
+        date start_date
+        date end_date
+    }
+
+    meter_readings {
+        string id PK
+        string meter_id FK
+        string billing_period_id FK
+        decimal previous_reading
+        decimal current_reading
+        decimal consumption
+        date reading_date
+    }
+
+    tariffs {
+        string id PK
+        string utility_type
+        string provider_name
+        string version UK
+        string tariff_category
+        date effective_from
+    }
+
+    tariff_tiers {
+        string id PK
+        string tariff_id FK
+        decimal from_value
+        decimal to_value
+        decimal unit_price
+        integer order_index
+    }
+
+    bills {
+        string id PK
+        string household_id FK
+        string utility_account_id FK
+        string billing_period_id FK
+        string bill_code UK
+        decimal estimated_amount
+        decimal final_amount
+        date due_date
+        string status
+        json tariff_version_snapshot
+        json bill_detail_snapshot
+    }
+
+    payments {
+        string id PK
+        string bill_id FK_UK
+        decimal amount
+        string method
+        string status
+        datetime paid_at
+    }
+
+    notifications {
+        string id PK
+        string user_id FK
+        string household_id FK
+        string type
+        string title
+        string message
+        string dedupe_key UK
+    }
+
+    users ||--o{ households : owns
+    users ||--o{ household_members : belongs_to
+    households ||--o{ household_members : contains
+    households ||--o{ utility_accounts : has
+    households ||--o{ meters : owns
+    households ||--o{ billing_periods : tracks
+    utility_accounts ||--o{ meters : connects
+    meters ||--o{ meter_readings : records
+    billing_periods ||--o{ meter_readings : bounds
+    billing_periods ||--o{ bills : issues
+    utility_accounts ||--o{ bills : generates
+    tariffs ||--o{ tariff_tiers : defines
+    bills ||--o| payments : settled_by
+    users ||--o{ notifications : receives
