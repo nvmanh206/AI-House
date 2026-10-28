@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architecture C4 and ERD"
+  short_description: "Model architecture, deployment and database evidence"
+  default_prompt: "Use $architecture-c4 to create verified diagrams from the requirements and code in this project."

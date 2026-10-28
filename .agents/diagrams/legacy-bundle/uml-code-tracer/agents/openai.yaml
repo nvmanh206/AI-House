@@ -1,0 +1,4 @@
+interface:
+  display_name: "UML Code Tracer"
+  short_description: "Trace code into sequence, class and activity UML"
+  default_prompt: "Use $uml-code-tracer to create verified diagrams from the requirements and code in this project."

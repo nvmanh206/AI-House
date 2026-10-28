@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "collected_on": "2026-10-29",
+  "baseline_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d",
+  "external_license_links_checked_on": "2026-10-29",
+  "license_scope": "Listed license is upstream repository license, not a claim of identical local code or license for this project.",
+  "resources": [
+    {
+      "id": "EXT-01",
+      "name": "diagram-design",
+      "status": "INSTALLATION_RECORD_ONLY",
+      "upstream": "https://github.com/cathrynlavery/diagram-design",
+      "upstream_license": "MIT",
+      "license_url": "https://github.com/cathrynlavery/diagram-design/blob/main/LICENSE",
+      "evidence": "Local skills-lock.json identifies source and skillPath; imported metadata only, not full personal lockfile.",
+      "recorded_package_hash": "67f22746f17be0f3d79393cf96b92d7e7f5ce10459c4ebd42956ab29c2ced10c",
+      "local_skill_sha256": null,
+      "upstream_identity_limit": "No pinned upstream commit or invocation log; installation is not execution."
+    },
+    {
+      "id": "EXT-02",
+      "name": "impeccable",
+      "status": "USER_REQUESTED",
+      "upstream": "https://github.com/pbakaus/impeccable",
+      "upstream_license": "Apache-2.0",
+      "license_url": "https://github.com/pbakaus/impeccable/blob/main/LICENSE",
+      "evidence": "Prompt DES-002 requests /impeccable init; local SKILL header read during collection.",
+      "local_skill_sha256": "fab04b31f946573b00a8559db1fc070f8ea5825254d491c2b13156e5661a86d7",
+      "upstream_identity_limit": "Does not prove initialization completed or local version equals current upstream."
+    },
+    {
+      "id": "EXT-03",
+      "name": "systematic-debugging",
+      "status": "LOCAL_READ_IN_CONVERSATION",
+      "upstream": "https://github.com/obra/superpowers",
+      "upstream_license": "MIT",
+      "license_url": "https://github.com/obra/superpowers/blob/main/LICENSE",
+      "evidence": "Visible tool read and debugging commentary in water-ingestion conversation; related code/tests at ab8fc26.",
+      "local_skill_sha256": "51c6435d98c83c42c96ba7c35725a0b2c376cd487fb1a4e6bd0ddbe7e33ef202",
+      "upstream_identity_limit": "Repository is an upstream reference; local snapshot equivalence to upstream not verified."
+    },
+    {
+      "id": "EXT-04",
+      "name": "verification-before-completion",
+      "status": "LOCAL_READ_IN_CONVERSATION",
+      "upstream": "https://github.com/obra/superpowers",
+      "upstream_license": "MIT",
+      "license_url": "https://github.com/obra/superpowers/blob/main/LICENSE",
+      "evidence": "Visible tool read before release checks in available conversation; independent proof of all prescribed steps is not claimed.",
+      "local_skill_sha256": "2befe7fc55bcadaa3d97dd9e8efeb633d2561c0ebe74c5a8b17c4d9e7e4520b3",
+      "upstream_identity_limit": "Local snapshot equivalence to upstream not verified."
+    },
+    {
+      "id": "EXT-05",
+      "name": "writing-plans",
+      "status": "AVAILABLE_SOURCE",
+      "upstream": "https://github.com/obra/superpowers",
+      "upstream_license": "MIT",
+      "license_url": "https://github.com/obra/superpowers/blob/main/LICENSE",
+      "evidence": "Local skill available and docs/superpowers/plans/2026-10-29-portable-docker.md exists; no authenticated per-skill execution log archived.",
+      "local_skill_sha256": "a6c67c1900064347c2a329990dd3c555657c51c3ec53b259a08aa01a2c26139a",
+      "upstream_identity_limit": "A plan artifact alone does not establish this skill was executed."
+    },
+    {
+      "id": "EXT-06",
+      "name": "skill-creator",
+      "status": "LOCAL_READ_CURRENT_COLLECTION",
+      "upstream": "https://github.com/openai/skills",
+      "upstream_license": "PER_SKILL_LICENSE_NOT_VERIFIED",
+      "license_url": "https://github.com/openai/skills#license",
+      "evidence": "Bundled skill-creator SKILL.md read during this evidence-authoring request.",
+      "local_skill_sha256": "cccd291077ec57c6f50ca6529f0f3fb93212da09473effb2fcec808e81b21288",
+      "upstream_identity_limit": "Exact upstream path/revision/license of local snapshot not established; no third-party contents vendored."
+    },
+    {
+      "id": "LOCAL-01",
+      "name": "ponytail",
+      "status": "LOCAL_READ_IN_CONVERSATION",
+      "upstream": null,
+      "upstream_license": "UNKNOWN",
+      "license_url": null,
+      "evidence": "Local SKILL.md read during water ingestion; no verified upstream metadata recovered.",
+      "local_skill_sha256": "f18008471528f0adde90a560d053f85935eed5cee26c447b7177ad24472bcf32",
+      "upstream_identity_limit": "Do not invent GitHub source or license; not copied into this repo."
+    },
+    {
+      "id": "LOCAL-02",
+      "name": "writing-for-agents",
+      "status": "LOCAL_READ_CURRENT_COLLECTION",
+      "upstream": null,
+      "upstream_license": "UNKNOWN",
+      "license_url": null,
+      "evidence": "Local SKILL.md and SKILL-MECHANICS.md read for current documentation.",
+      "local_skill_sha256": "1c0c4ebf2d221917591144f0ced4fe46dae13301cb3d6d93fc88ecf0dda6aed2",
+      "upstream_identity_limit": "No verified upstream metadata recovered; local contents not redistributed."
+    }
+  ],
+  "new_project_workflows": [
+    {
+      "path": ".agents/skills/nha-minh-documentation-evidence/SKILL.md",
+      "status": "PROPOSED",
+      "created_on": "2026-10-29",
+      "execution_proven": false
+    },
+    {
+      "path": ".agents/skills/nha-minh-five-layer-testing/SKILL.md",
+      "status": "PROPOSED",
+      "created_on": "2026-10-29",
+      "execution_proven": false
+    },
+    {
+      "path": ".agents/skills/nha-minh-implementation/SKILL.md",
+      "status": "PROPOSED",
+      "created_on": "2026-10-29",
+      "execution_proven": false
+    },
+    {
+      "path": ".agents/skills/nha-minh-requirements-planning/SKILL.md",
+      "status": "PROPOSED",
+      "created_on": "2026-10-29",
+      "execution_proven": false
+    },
+    {
+      "path": ".agents/skills/nha-minh-security-optimization/SKILL.md",
+      "status": "PROPOSED",
+      "created_on": "2026-10-29",
+      "execution_proven": false
+    },
+    {
+      "path": ".agents/diagrams/sdlc-diagrams/SKILL.md",
+      "status": "PROPOSED",
+      "created_on": "2026-10-29",
+      "execution_proven": false
+    }
+  ],
+  "legacy_bundle": ".agents/diagrams/legacy-manifest.json",
+  "limits": [
+    "No full authenticated chat export available.",
+    "File/report/commit alone does not establish agent authorship.",
+    "No private .local evidence imported."
+  ]
+}

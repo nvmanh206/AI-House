@@ -26,7 +26,10 @@ playwright-report/
 out/
 .DS_Store
 Thumbs.db
-.agents/
+# .agents/ is tracked as the AI Development Evidence & Skills Repository
+.agents/**/__pycache__/
+.agents/**/*.pyc
+.agents/**/.skill-backups/
 .codex/
 .claude/
 .impeccable/

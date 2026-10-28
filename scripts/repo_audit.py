@@ -5,7 +5,7 @@ root=Path(__file__).resolve().parents[1]
 raw=subprocess.check_output(['git','-c','safe.directory='+str(root).replace('\\','/'),'ls-files','-c','-o','--exclude-standard','-z'],cwd=root)
 paths=sorted(set(p for p in raw.decode().split('\0') if p))
 bad=[]
-blocked={'.local','node_modules','.next','.venv','__pycache__','.pytest_cache','.agents','.codex','.claude','.impeccable'}
+blocked={'.local','node_modules','.next','.venv','__pycache__','.pytest_cache','.codex','.claude','.impeccable'}
 for name in paths:
     path=root/name
     if blocked.intersection(Path(name).parts) or (Path(name).name.startswith('.env') and not name.endswith('.env.example')):

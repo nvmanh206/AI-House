@@ -1,0 +1,4 @@
+interface:
+  display_name: "System Design Orchestrator"
+  short_description: "Coordinate evidence-based UML and system design"
+  default_prompt: "Use $system-design-orchestrator to create verified diagrams from the requirements and code in this project."

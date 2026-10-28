@@ -1,5 +1,8 @@
 # Nhà Mình — Quản lý hóa đơn điện nước có tích hợp Gemini AI
 
+> 🎓 **Đồ án môn học:** Ứng dụng Trí tuệ nhân tạo (Applied Artificial Intelligence)  
+> 📚 **Minh chứng Phát triển bằng AI:** Xem ngay [Tài liệu Minh chứng Tổng quan (AI_DEVELOPMENT.md)](AI_DEVELOPMENT.md) | [Agent Skills & Rules (.agents/)](.agents/README.md) | [Kho Prompts theo 8 Giai đoạn SDLC (prompts/)](prompts/README.md) | [Ma trận Truy vết Yêu cầu → Mã nguồn (prompts/TRACEABILITY.md)](prompts/TRACEABILITY.md)
+
 ## 1. Clone và khởi động
 
 Yêu cầu: Git, Docker Desktop đang chạy với Linux containers và mạng để tải image/dependencies lần đầu. Không cần cài Python, Node.js, PostgreSQL hay pgAdmin trên máy.

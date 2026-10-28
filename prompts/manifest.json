@@ -1,0 +1,352 @@
+{
+  "schema_version": 1,
+  "collected_on": "2026-10-29",
+  "baseline_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d",
+  "prompts": [
+    {
+      "id": "REQ-001",
+      "stage": "01-requirements",
+      "path": "prompts/01-requirements/req-001-project-review.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-REQ-001",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "17f248f9c6a6bc2eb8cffdf6e8772a17b1572932bb758599bcdd95aed9391d22",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "docs/replanning/2026-10-27-phan-tich-va-quy-hoach-v2.md",
+        "docs/replanning/V2-MASTER-PLAN-IMPROVED.md"
+      ],
+      "tests": [],
+      "limitations": "Các tài liệu quy hoạch là đầu ra liên quan đã lưu; không xác minh được ngày gửi hay nguyên bản đầy đủ của phiên phân tích.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "REQ-002",
+      "stage": "01-requirements",
+      "path": "prompts/01-requirements/req-002-real-data.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-REQ-002",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "56dbe7ce782ddfbebbe515f2cb39bbcd11e86be1e558ebd6dd0f831112a92738",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "docker-compose.yml",
+        "backend/app/db.py",
+        "backend/app/billing_service.py"
+      ],
+      "tests": [
+        "backend/tests/test_docker_bootstrap.py"
+      ],
+      "limitations": "Runtime dùng PostgreSQL; test có fixture riêng là hợp lệ. Không suy diễn rằng mọi số ví dụ hoặc fixture đều bị cấm.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "PLAN-001",
+      "stage": "02-planning",
+      "path": "prompts/02-planning/plan-001-sdlc.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-PLAN-001",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "07a8cf1210546894f3dd04f990dd6bf0cad9fadaad2c29532b16780f4d82b298",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "docs/sdlc/SDLC-MASTER-PLAN.md",
+        "docs/sdlc/SDLC-REQUIREMENTS-TRACEABILITY.md",
+        "docs/replanning/2026-10-27-backlog-v2.md"
+      ],
+      "tests": [],
+      "limitations": "Kế hoạch không phải chứng nhận mọi hạng mục đã triển khai hoặc nghiệm thu.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "PLAN-002",
+      "stage": "02-planning",
+      "path": "prompts/02-planning/plan-002-checkpoint.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-PLAN-002",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "b0fd767a5350286a453c5e6d7c8f2071f5bdddc07119eb7e590d6f7f967f2b98",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "IMPLEMENTATION_PROGRESS.md"
+      ],
+      "tests": [],
+      "limitations": "Nhật ký do quá trình thực hiện ghi nhận; không phải transcript bất biến hay dữ liệu đo độc lập.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "DES-001",
+      "stage": "03-design",
+      "path": "prompts/03-design/des-001-usecase-preserved.md",
+      "status": "VERBATIM_FILE",
+      "source_kind": "repository_file",
+      "source_path": "docs/prompt/usecase.md",
+      "source_sha256": "8a43b7b9ca190a6e9caaaaf726b956dbc16df9e3c62c71066e6b2eecd5ff34f8",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Unknown original host; skills named in source prompt",
+      "outputs": [
+        "docs/design/diagram-manifest.json",
+        "docs/design/render-report.json",
+        "docs/uml/specs/use-case-specifications.md"
+      ],
+      "tests": [],
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d",
+      "limitations": "Preserved file text, not proof of historical submission; named DOCX input missing at original path."
+    },
+    {
+      "id": "DES-002",
+      "stage": "03-design",
+      "path": "prompts/03-design/des-002-impeccable-init.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-DES-002",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "1b08d58b367cb5fa1e37303b7fbf1bedf1d2da8f4510269d5f3729157c6c190a",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "docs/replanning/V2-UX-REDESIGN.md"
+      ],
+      "tests": [],
+      "limitations": "Có lệnh người dùng yêu cầu Impeccable; chưa có log đủ xác nhận init hoàn tất hoặc gán toàn bộ UI cho skill này.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "IMP-001",
+      "stage": "04-implementation",
+      "path": "prompts/04-implementation/imp-001-gemini-images.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-IMP-001",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "931126f84aa4d45c9d80eadb0e898b58e1a21781a2550e6ff2aa8e099a41f01c",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "backend/app/ai/multimodal.py",
+        "backend/app/ai/gemini_structured.py",
+        "frontend/components/invoice-result-details.tsx"
+      ],
+      "tests": [
+        "backend/tests/test_multimodal.py",
+        "frontend/tests/multimodal-ui.test.cjs"
+      ],
+      "limitations": "Trích riêng câu luồng chính trong kế hoạch ảnh do người dùng cung cấp, không phải toàn bộ plan. Đối chiếu thêm schema/test; không kết luận mọi ảnh thật đều được nhận diện.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "IMP-002",
+      "stage": "04-implementation",
+      "path": "prompts/04-implementation/imp-002-public-rag.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-IMP-002",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "499c0ca90ad1ec3e745b9497943417e3024c9a7dfa72f65187c836a50610e2b5",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "backend/app/knowledge/service.py",
+        "backend/app/knowledge/crawler.py",
+        "backend/app/knowledge/embedding.py",
+        "backend/app/knowledge/migrations/001.sql",
+        "frontend/components/knowledge-admin.tsx"
+      ],
+      "tests": [
+        "backend/tests/test_knowledge.py",
+        "backend/tests/test_water_knowledge.py"
+      ],
+      "limitations": "Trích câu luồng chính trong kế hoạch RAG. Bộ 50 câu hỏi/top-5 90% trong kế hoạch chưa có bằng chứng đã nghiệm thu đủ; không biến thành kết quả đạt.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "TEST-001",
+      "stage": "05-testing",
+      "path": "prompts/05-testing/test-001-five-layers.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-TEST-001",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "ec1180e8883702426be539e2752109126880f7044e3248da5b896d6bef96073e",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "docs/sdlc/SDLC-TEST-STRATEGY.md",
+        "docs/sdlc/VERIFICATION-GEMINI-MULTIMODAL-2026-10-28.md"
+      ],
+      "tests": [
+        "backend/tests/test_multimodal.py",
+        "frontend/tests/knowledge-ui.test.cjs"
+      ],
+      "limitations": "Nguyên văn ghi 3 tầng nhưng liệt kê 5, gồm lỗi chính tả tranform. Chuẩn hóa thành UI/API/server/system/transform. Test tĩnh/TestClient không thay nghiệm thu trình duyệt/live.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "DEP-001",
+      "stage": "06-deployment",
+      "path": "prompts/06-deployment/dep-001-clone-docker.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-DEP-001",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "bbc06a09b30223ecdfc4513e3171f89c80ff30abc881860e6a3439fb71c2cb01",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "docker-compose.yml",
+        "backend/app/container_start.py",
+        "backend/app/bootstrap.py",
+        "deploy/pgadmin.servers.json",
+        "DOCKER_GUIDE.md"
+      ],
+      "tests": [
+        "backend/tests/test_docker_bootstrap.py"
+      ],
+      "limitations": "Dữ liệu máy tác giả không đi theo Git. Gemini cần key riêng; bootstrap nguồn không đồng nghĩa đã có nội dung RAG. Lượt test clone/volume được ghi trong nhật ký, không có raw transcript công khai.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "DEP-002",
+      "stage": "06-deployment",
+      "path": "prompts/06-deployment/dep-002-clean-push.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-DEP-002",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "ca534bba43555084ad76fa193ca2484586e358e0ffbd16b1f8e35b5fc7700fa0",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        ".gitignore",
+        "scripts/repo_audit.py",
+        "IMPLEMENTATION_PROGRESS.md"
+      ],
+      "tests": [],
+      "limitations": "Commit ab8fc26 loại file local/agent thừa. Không chép key cũ vào bằng chứng; xóa ở tip không xóa lịch sử Git. Bản tổng hợp này chỉ cho phép .agents đã chọn lọc.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "OPT-001",
+      "stage": "07-optimization",
+      "path": "prompts/07-optimization/opt-001-free-key.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-OPT-001",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "3b55d16c3d31531599729b85207396a0c999cc81c2e45bbdf2656a8b13c45897",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "backend/app/ai/quota.py",
+        "backend/app/ai/gemini_structured.py",
+        "backend/app/knowledge/service.py"
+      ],
+      "tests": [
+        "backend/tests/test_knowledge_postgres.py"
+      ],
+      "limitations": "Code/nhật ký ghi cơ chế model cấu hình, giới hạn/cooldown và tìm kiếm suy giảm. Không có benchmark chuẩn để khẳng định % tiết kiệm/tốc độ.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "OPT-002",
+      "stage": "07-optimization",
+      "path": "prompts/07-optimization/opt-002-no-fake-fallback.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-OPT-002",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "854ea08cdd26bde4fc49b5ef94a4d5746fe74175e330ff74dc8f0ddbf4dd9343",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "backend/app/ai/agent.py",
+        "backend/app/ai/gemini_structured.py"
+      ],
+      "tests": [
+        "frontend/tests/chat-degraded.test.cjs",
+        "backend/tests/test_multimodal.py"
+      ],
+      "limitations": "Ảnh minh họa gốc không được sao chép do có thông tin tài khoản. Offline deterministic behavior còn cho test; production phải xem đường gọi hiện hành.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "OPT-003",
+      "stage": "07-optimization",
+      "path": "prompts/07-optimization/opt-003-security-review-proposed.md",
+      "status": "PROPOSED",
+      "source_kind": "newly_authored",
+      "source_path": null,
+      "source_sha256": null,
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Not executed",
+      "outputs": [],
+      "tests": [],
+      "artifact_revision": null,
+      "limitations": "Proposed only; no security-audit result."
+    },
+    {
+      "id": "DOC-001",
+      "stage": "08-documentation",
+      "path": "prompts/08-documentation/doc-001-readme-data.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-DOC-001",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "e7b10f2e3c2f3fc72f687c9cd43dd86abe12f4b144d8dcb01156f7af4fdffa4d",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "README.md",
+        "DOCKER_GUIDE.md"
+      ],
+      "tests": [],
+      "limitations": "Commit dc19327 bổ sung clone-root, migration, named volumes, pgAdmin và backup. Kiểm tra tài liệu không thay kiểm thử restore thực tế.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    },
+    {
+      "id": "DOC-002",
+      "stage": "08-documentation",
+      "path": "prompts/08-documentation/doc-002-ai-evidence.md",
+      "status": "EXACT_EXCERPT",
+      "source_kind": "conversation_context",
+      "source_ref": "C-DOC-002",
+      "source_path": "prompts/sources/user-excerpts.json",
+      "source_sha256": "52adefeb75191c49602de2a23055d6a2ee5fa87a6d97100fce8bff2b616534dc",
+      "collected_on": "2026-10-29",
+      "original_date": null,
+      "tool": "Codex conversation; original model identifier not established",
+      "outputs": [
+        "AI_DEVELOPMENT.md",
+        ".agents/README.md",
+        ".agents/evidence.json",
+        "prompts/README.md"
+      ],
+      "tests": [],
+      "limitations": "Trích từ yêu cầu hiện tại; bộ tài liệu đang được tổng hợp ngày 29/10/2026, không phải đã tồn tại từ đầu đồ án.",
+      "artifact_revision": "dc19327851a5bae38f57a0e233a109d8d5d24d2d"
+    }
+  ]
+}

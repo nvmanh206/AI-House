@@ -1,0 +1,4 @@
+interface:
+  display_name: "UML Use Case"
+  short_description: "Create actor goals and correct use case relationships"
+  default_prompt: "Use $uml-use-case to create verified diagrams from the requirements and code in this project."

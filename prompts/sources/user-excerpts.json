@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "captured_on": "2026-10-29",
+  "warning": "Selective transcription from available conversation context; not authenticated full chat export. No original dates inferred.",
+  "excerpts": [
+    {
+      "id": "C-REQ-001",
+      "text": "mình cần lên planning lại cho toàn bộ dự án\nhệ thống quản lý hóa đơn điện nước hộ gia đình có tích hợp AI\nMÌNH CHƯA HÀI LÒNG VỀ HỆ THỐNG HIỆN TẠI\nHÃY PHÂ TÍCH TỔNG QUAN HỆ THỐNG HIỆN TẠI VÀ LÊN PLANNING MỚI CHO MÌNH THẬT CHI TIẾT\nTOÀN BỘ CODE HỆ THỐNG SẼ ĐẶT TRONG FOLDER website",
+      "sha256": "17f248f9c6a6bc2eb8cffdf6e8772a17b1572932bb758599bcdd95aed9391d22",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-REQ-002",
+      "text": "toàn bộ . lưu ý mình cần xử lí với dữ liệu thật không có hardcode\nsử dụng postgresql và pgadmin để làm giao diện hiển thị database",
+      "sha256": "56dbe7ce782ddfbebbe515f2cb39bbcd11e86be1e558ebd6dd0f831112a92738",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-PLAN-001",
+      "text": "mình cần lên planning làm chuẩn theo quy trình SDLC",
+      "sha256": "07a8cf1210546894f3dd04f990dd6bf0cad9fadaad2c29532b16780f4d82b298",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-PLAN-002",
+      "text": "BẮT ĐẦU TRIỂN KHAI CẢI THIỆN HỆ THỐNG HIỆN TẠI\nNHỚ TẠO 1 FILE LƯU LẠI DẤU VẾT NHỮNG GÌ ĐÃ LÀM ĐƯỢC ĐỂ SAU KHI LIMIT QUOTA THÌ SẼ TIẾP TỤC ĐƯỢC",
+      "sha256": "b0fd767a5350286a453c5e6d7c8f2071f5bdddc07119eb7e590d6f7f967f2b98",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-DES-002",
+      "text": "/impeccable init",
+      "sha256": "1b08d58b367cb5fa1e37303b7fbf1bedf1d2da8f4510269d5f3729157c6c190a",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-IMP-001",
+      "text": "User gửi ảnh + yêu cầu → backend xác thực và kiểm tra ảnh → Gemini đọc ảnh, hiểu yêu cầu → backend kiểm tra và đối chiếu → Gemini diễn đạt → giao diện hiển thị.",
+      "sha256": "931126f84aa4d45c9d80eadb0e898b58e1a21781a2550e6ff2aa8e099a41f01c",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-IMP-002",
+      "text": "Nguồn chính thức → crawler → kiểm tra và lưu phiên bản → tạo embedding → PostgreSQL RAG → truy xuất tài liệu liên quan → Gemini trả lời tự nhiên kèm nguồn.",
+      "sha256": "499c0ca90ad1ec3e745b9497943417e3024c9a7dfa72f65187c836a50610e2b5",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-TEST-001",
+      "text": "phần kiểm thử mình cần kiểm thử ở 3 tầng\ntầng giao diện\ntầng api\ntầng server\ntầng system\ntầng tranform",
+      "sha256": "ec1180e8883702426be539e2752109126880f7044e3248da5b896d6bef96073e",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-DEP-001",
+      "text": "mình cần cấu hình tự động hoàn toàn để khi push lên git thành viên khác clone về chỉ cần chạy lệnh docker là có thể sử dụng như bình thường được\nvà quan trọng phải clean được project khi push lên git",
+      "sha256": "bbc06a09b30223ecdfc4513e3171f89c80ff30abc881860e6a3439fb71c2cb01",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-DEP-002",
+      "text": "mình cần push /website lên repo này\nnhưng phải clean chỉ push những gì liên quan đến project\ntránh đẩy rác lên",
+      "sha256": "ca534bba43555084ad76fa193ca2484586e358e0ffbd16b1f8e35b5fc7700fa0",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-OPT-001",
+      "text": "bạn đề xuất hướng tối ưu rồi xử lý cho mình nhé\nnếu cần có thể chọn model thấp hơn miễn tối ưu được số lần hỏi và tốc độ trả lời\nvì có thể sẽ hỏi nhiều á",
+      "sha256": "3b55d16c3d31531599729b85207396a0c999cc81c2e45bbdf2656a8b13c45897",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-OPT-002",
+      "text": "phân tích kiểm tra lại luồng xử lí\nsao lại để AI trả lời như này\nmình cần lấy câu trả lời từ gemini đưa về mà",
+      "sha256": "854ea08cdd26bde4fc49b5ef94a4d5746fe74175e330ff74dc8f0ddbf4dd9343",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-DOC-001",
+      "text": "file readme có hướng dẫn chi tiết chưa\ndata lưu vào đâu tự tạo thế nào",
+      "sha256": "e7b10f2e3c2f3fc72f687c9cd43dd86abe12f4b144d8dcb01156f7af4fdffa4d",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    },
+    {
+      "id": "C-DOC-002",
+      "text": "Ưu tiên thu thập **skill, rule và prompt đã thực sự được sử dụng**, không tự tạo lịch sử sử dụng AI hoặc kết quả không có minh chứng.",
+      "sha256": "52adefeb75191c49602de2a23055d6a2ee5fa87a6d97100fce8bff2b616534dc",
+      "origin": "User message available in current conversation context; selected text only",
+      "original_timestamp": null,
+      "captured_on": "2026-10-29"
+    }
+  ]
+}
