@@ -1,6 +1,6 @@
 # Chạy Nhà Mình bằng Docker
 
-Cài Docker Desktop và bật Linux containers. Từ thư mục `website`, chạy:
+Cài Docker Desktop và bật Linux containers. Từ thư mục repo vừa clone (AI-House, nơi chứa docker-compose.yml), chạy:
 
 ```sh
 docker compose up -d --build --wait
@@ -43,3 +43,20 @@ Có thể đổi FRONTEND_PORT, API_PORT, POSTGRES_PORT, KNOWLEDGE_POSTGRES_PORT
 ## Trước khi push
 
 Chạy `python scripts/repo_audit.py` nếu máy có Python, xem `git status` và diff. Script kiểm tra tập file dự kiến đưa lên Git, chặn env/runtime artifacts và một số mẫu secret; không thay thế kiểm toán toàn bộ lịch sử Git. Các thư mục .local, .env, node_modules, cache/build và cấu hình agent cá nhân được ignore. File `.env.example`, migration, lockfile và dữ liệu biểu giá công khai có nguồn phải giữ lại.
+
+
+## Sao lưu dữ liệu
+
+Tạo thư mục backups tại gốc repo. Lệnh dưới dùng dump nhị phân bên trong container rồi docker cp ra máy host, tránh lỗi encoding khi chuyển hướng output trong Windows PowerShell:
+
+```sh
+mkdir backups
+docker compose exec -T postgres pg_dump -U utility -d utility -Fc -f /tmp/utility.dump
+docker compose cp postgres:/tmp/utility.dump ./backups/utility.dump
+docker compose exec -T knowledge-postgres pg_dump -U knowledge -d knowledge -Fc -f /tmp/knowledge.dump
+docker compose cp knowledge-postgres:/tmp/knowledge.dump ./backups/knowledge.dump
+```
+
+Các tên file cố định sẽ thay bản backup trước; đổi tên theo ngày nếu muốn giữ nhiều bản. Đây là backup từng database, không phải snapshot đồng bộ của cả hệ thống đang ghi dữ liệu. Để backup đầy đủ và nhất quán, tạm dừng backend/scheduler trong thời gian backup, đồng thời export volume knowledge_archive bằng Docker Desktop (Volumes → chọn volume → Export), rồi chạy lại backend/scheduler. Cần giữ cả dump RAG và archive để đọc/tải tài liệu gốc sau khi khôi phục. Runtime/pgAdmin cũng có thể export nếu muốn giữ khóa JWT và cấu hình đăng nhập.
+
+Không commit backups hoặc gửi dump có dữ liệu cá nhân lên GitHub. Dùng pgAdmin Restore để khôi phục dump vào database đích đã chuẩn bị; kiểm tra đúng môi trường trước khi restore vì có thể xung đột với dữ liệu hiện có. Clone code đơn thuần không tự lấy backup hay dữ liệu của máy khác.

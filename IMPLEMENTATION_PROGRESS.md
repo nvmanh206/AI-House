@@ -399,3 +399,6 @@ User authorized cleaning and pushing website to https://github.com/nvmanh206/AI-
 - IMPORTANT: a.py in the initial commit already contained an embedded API credential. Removing the file from the new tree does not remove it from existing remote history. Owner must revoke/rotate that old key; history was not rewritten.
 - Extended source audit for AQ-style and GitHub token formats. Final targeted checks: frontend node tests 31 passed; backend chat/public tariff/multimodal/knowledge/water/bootstrap 41 passed; docker compose config -q passed. DOCX project reports checked for embedded Gemini credential patterns without displaying values.
 - Publication uses a normal commit and push HEAD:main; no force-push, no database or env files included. GitHub main verification follows push.
+
+## 2026-10-29 — README onboarding and data persistence
+Expanded README with correct clone-root commands, automatic migrations/bootstrap, first registration, five named volumes and their mount paths, pgAdmin connection details, optional Gemini/RAG ingestion, restart/update persistence and data-sharing limits. Added database/archive backup guidance and ignored backups/*.dump. Checked volume names against Compose; documentation-only update, no runtime behavior changed.

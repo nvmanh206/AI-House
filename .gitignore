@@ -36,3 +36,5 @@ Thumbs.db
 /HUONG_DAN_SYSTEM_DESIGN_SKILLS.md
 skills-lock.json
 CLAUDE.md
+/backups/
+*.dump

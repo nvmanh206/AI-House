@@ -1,71 +1,113 @@
-# Nhà Mình — Quản lý hóa đơn điện nước có tích hợp AI
+# Nhà Mình — Quản lý hóa đơn điện nước có tích hợp Gemini AI
 
-## Clone và chạy
+## 1. Clone và khởi động
+
+Yêu cầu: Git, Docker Desktop đang chạy với Linux containers và mạng để tải image/dependencies lần đầu. Không cần cài Python, Node.js, PostgreSQL hay pgAdmin trên máy.
 
 ```sh
-cd website
+git clone https://github.com/nvmanh206/AI-House.git
+cd AI-House
 docker compose up -d --build --wait
 ```
 
-Mở http://localhost:3000, đăng ký tài khoản đầu tiên để quản trị và tạo hộ của bạn. Không cần `.env` để khởi động; Gemini cần key riêng khi sử dụng AI. PostgreSQL, pgAdmin, migration và danh mục biểu giá công khai được cấu hình tự động. Không seed dữ liệu hộ demo. Xem [hướng dẫn Docker](DOCKER_GUIDE.md) về dữ liệu bền vững, cấu hình Gemini và tài khoản pgAdmin.
+**Trong repo GitHub này, nội dung thư mục website đã nằm ở gốc repo. Không chạy thêm `cd website` sau khi clone.** Nếu bạn đang dùng workspace gốc có thư mục website thì chạy Docker ngay trong thư mục website đó.
 
-## Chạy từng phần để phát triển
+- Ứng dụng: http://localhost:3000
+- API Swagger: http://localhost:8000/docs
+- pgAdmin: http://localhost:5050
 
-Yêu cầu: Python 3.12+; Node.js 22+; PostgreSQL 16+.
+Mở ứng dụng, tự đăng ký tài khoản rồi tạo hộ và công tơ. Tài khoản đầu tiên trong cấu hình phát triển là ADMIN, các tài khoản tiếp theo là USER. Không có tài khoản demo tự tạo. Launcher `docker-start.bat` hoặc `sh docker-start.sh` thực hiện cùng thao tác khởi động.
 
-**Ghi chú lịch sử máy phát triển (không áp dụng cho clone Docker mới):** PostgreSQL portable 16.15 chạy tại `127.0.0.1:5433`, database ứng dụng `utility_app`; pgAdmin Docker tại `http://127.0.0.1:5050`. SQLite trước đây đã được sao lưu và chuyển đổi, đối chiếu đủ 15 bảng trước khi đổi `backend/.env`. Database PostgreSQL `utility` cũ vẫn được giữ nguyên. Xem [hướng dẫn PostgreSQL và pgAdmin](docs/POSTGRESQL-PGADMIN.md) trước khi khởi động; không tự chuyển sang database Docker ở cổng 5434.
+## 2. Hệ thống tự tạo những gì?
 
-```powershell
-cd website
-python scripts/setup_env.py
-docker compose up -d postgres
-cd backend
-python -m venv .venv
-.\.venv\Scripts\python -m pip install -r requirements.lock.txt
-.\.venv\Scripts\python -m alembic upgrade head
-.\.venv\Scripts\python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000 
+Lần chạy đầu, Docker tự tạo network và các volume; PostgreSQL tạo database `utility` và `knowledge`. Backend đợi hai database sẵn sàng, chạy migration tạo bảng/index/pgvector, đăng ký nguồn tri thức điện nước và nhập danh mục biểu giá điện EVN có nguồn, có phiên bản. Nếu chưa cấu hình JWT_SECRET, backend tự sinh khóa và lưu trong volume runtime. Frontend và scheduler chạy sau khi backend sẵn sàng.
+
+Khi chạy lại, hệ thống dùng dữ liệu trong volume đã có. Migration/bootstrap được thiết kế chạy lặp mà không tạo trùng danh mục.
+
+Các phần **không có sẵn khi clone**:
+
+- Tài khoản, hộ, công tơ, chỉ số, hóa đơn, thanh toán của máy khác. Bạn tự đăng ký và nhập dữ liệu của mình.
+- Gemini API key: mỗi thành viên tự cấu hình nếu cần AI.
+- Nội dung kho RAG đã crawl trên máy người khác: Git chỉ chứa code và danh sách nguồn. Sau khi có key, scheduler thu thập nguồn đến hạn; admin cũng có thể yêu cầu crawl trong Kho tri thức. Nội dung cần tải, trích xuất, embedding và đạt điều kiện công bố trước khi AI truy xuất được; không bảo đảm thành công ngay vì còn phụ thuộc nguồn/quota.
+
+Nhập chỉ số sẽ lưu PostgreSQL và tính lượng dùng. Hóa đơn ước tính được tạo khi có biểu giá nghiệp vụ phù hợp nhà cung cấp, nhóm giá, địa phương và kỳ. Giá nước trong RAG phục vụ giải thích/tra cứu, **không tự biến thành biểu giá tính hóa đơn**.
+
+## 3. Dữ liệu lưu ở đâu?
+
+Dữ liệu bền vững nằm trong **Docker named volumes trên máy đang chạy Docker**, không nằm trong source Git:
+
+- `nha-minh-utilities_postgres_data`: PostgreSQL nghiệp vụ, gồm tài khoản/hộ/công tơ/chỉ số/hóa đơn/thanh toán. Mount tại `/var/lib/postgresql/data` của service postgres.
+- `nha-minh-utilities_knowledge_data`: PostgreSQL RAG, gồm nguồn, tài liệu/phiên bản, đoạn văn, vector và nhật ký crawl/truy xuất. Mount tại `/var/lib/postgresql/data` của service knowledge-postgres.
+- `nha-minh-utilities_knowledge_archive`: HTML/PDF gốc và nội dung trích xuất, mount tại `/data/knowledge`.
+- `nha-minh-utilities_runtime_data`: khóa JWT tự sinh, mount tại `/app/runtime`.
+- `nha-minh-utilities_pgadmin_data`: cấu hình, tài khoản và kết nối pgAdmin, mount tại `/var/lib/pgadmin`.
+
+Các tên trên dùng project name mặc định. Nếu dùng `docker compose -p ten-khac`, prefix volume cũng thay đổi, nên bạn sẽ thấy bộ dữ liệu riêng.
+
+Trên Windows Docker Desktop, volume nằm trong ổ đĩa Linux do Docker quản lý; không phải thư mục PostgreSQL ngay bên cạnh code. Xem tại **Docker Desktop → Volumes** hoặc:
+
+```sh
+docker volume ls
+docker volume inspect nha-minh-utilities_postgres_data
 ```
 
-Terminal khác:
+Để xem dữ liệu dạng bảng, dùng pgAdmin. Không sửa trực tiếp các file vật lý của PostgreSQL.
+
+## 4. Xem database trong pgAdmin
+
+Đăng nhập http://localhost:5050 bằng cấu hình phát triển mặc định: email `admin@example.com`, mật khẩu `LocalPgAdmin2026!`. Đây là tài khoản pgAdmin, khác tài khoản bạn đăng ký trong ứng dụng.
+
+Hai server được đăng ký sẵn. Khi pgAdmin hỏi mật khẩu kết nối:
+
+- Nghiệp vụ: host `postgres`, port `5432`, database/user `utility`, mật khẩu mặc định `utility_local_dev`.
+- Tri thức: host `knowledge-postgres`, port `5432`, database/user `knowledge`, mật khẩu mặc định `knowledge_local_dev`.
+
+Đó là địa chỉ **bên trong Docker**. Công cụ PostgreSQL cài trên máy host dùng `localhost:5434` cho nghiệp vụ, `localhost:5435` cho RAG. Nếu đã đổi `.env`, dùng giá trị riêng của bạn. Mật khẩu mặc định chỉ dành cho phát triển local; các cổng chỉ bind 127.0.0.1.
+
+## 5. Bật Gemini và thu thập tri thức
+
+Tạo `.env` tại cùng thư mục với docker-compose.yml:
 
 ```powershell
-cd website/frontend
-npm ci
-npm run dev
+Copy-Item .env.example .env
 ```
 
-Terminal thứ ba, nếu cần nhắc lịch tự động:
+Linux/macOS dùng `cp .env.example .env`. Điền GEMINI_API_KEY trong file vừa tạo; chọn GEMINI_MODEL được tài khoản của bạn cấp quyền. Sau đó:
 
-```powershell
-cd website/backend
-.\.venv\Scripts\python -m app.scheduler
+```sh
+docker compose up -d --force-recreate backend scheduler
 ```
 
-Dùng cùng hostname `localhost` cho frontend/backend để cookie same-site hoạt động. `.env` được tạo một lần, không ghi đè và không in secret. Nếu PostgreSQL của bạn dùng cấu hình riêng, sửa `backend/.env`. Tuyệt đối không commit các file `.env`.
+Trên máy đã có `.env`, sửa file hiện tại; không chép đè vì có thể làm sai mật khẩu database đang sử dụng. Không đưa key lên Git. Chưa có key vẫn quản lý chỉ số/hóa đơn được; chat/crawl sẽ cần key và quota hợp lệ.
 
-## Tài khoản demo
+Đăng nhập tài khoản admin → Quản trị hệ thống → Kho tri thức (`/admin/knowledge`) → chọn nguồn → Thu thập lại → xem lịch sử và trạng thái tài liệu. Scheduler xử lý công việc nền; trang có trạng thái chờ không đồng nghĩa crawl đã hoàn tất. Biểu giá thiếu căn cứ vẫn chờ duyệt.
 
-Chỉ tồn tại sau lệnh seed, seed bị chặn khi `APP_ENV=production`:
+## 6. Dừng, cập nhật và giữ dữ liệu
 
-- Chủ hộ: `demo@example.com` / `DemoHouse123!`
-- Admin: `admin@example.com` / `AdminHouse123!`
-- Seed gồm một hộ, hai công tơ, 12 tháng điện + 12 tháng nước, hóa đơn, thanh toán thủ công, thông báo và biểu giá minh họa.
-- Provider seed: **Điện Demo**, **Nước Demo**. Giá không phải biểu giá hiện hành của EVN hay công ty nước.
-- Tài khoản mới cần nhà cung cấp khớp biểu giá admin đã cấu hình. Có thể dùng tên provider demo nếu đang demo.
+```sh
+# Dừng container, giữ volumes và dữ liệu
+docker compose down
 
-## Kiểm thử
+# Khởi động lại
+docker compose up -d --wait
 
-```powershell
-cd website/backend
-.\.venv\Scripts\python -m pytest -q
-.\.venv\Scripts\python -m alembic check
-cd ../frontend
-npm run build
-npm run typecheck
-npm audit
+# Nhận code mới và build lại
+git pull
+docker compose up -d --build --wait
 ```
 
-Lệnh pytest trực tiếp vẫn mặc định SQLite. Để chạy đúng PostgreSQL đang dùng, từ `website` chạy `.\backend\.venv\Scripts\python.exe scripts/test_postgres.py`: runner dùng database riêng `utility_app_test`, không dùng database ứng dụng và không xóa dữ liệu có sẵn. Kết quả mới nhất: 86 passed trên PostgreSQL. `utility_test` cũ thiếu cột, đã giữ nguyên để tránh sửa nhầm schema. Xem [hướng dẫn PostgreSQL và pgAdmin](docs/POSTGRESQL-PGADMIN.md).
+Không dùng `docker compose down -v`, không xóa volume hay chọn dọn cả volumes trong Docker Desktop nếu cần giữ dữ liệu. Clone trên máy mới hoặc đổi project name sẽ có database riêng; Git không đồng bộ dữ liệu giữa các máy. Muốn chia sẻ dữ liệu, cần backup/restore hoặc một database dùng chung được cấu hình riêng.
+
+## 7. Sao lưu và kiểm tra lỗi
+
+Chi tiết backup ở [DOCKER_GUIDE.md](DOCKER_GUIDE.md#sao-lưu-dữ-liệu). Xem trạng thái và log:
+
+```sh
+docker compose ps
+docker compose logs --tail=100 backend scheduler frontend
+```
+
+Có thể đổi cổng trong `.env` nếu trùng cổng trên máy. Hướng dẫn Docker là luồng khởi động chuẩn; các tài liệu PostgreSQL portable/SQLite cũ dưới docs mô tả môi trường phát triển trước đây.
 
 ## Cấu trúc
 
