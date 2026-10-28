@@ -17,6 +17,7 @@ def main():
         initialize()
         os.execvp('uvicorn',['uvicorn','app.main:app','--host','0.0.0.0','--port','8000'])
     if mode=='scheduler':os.execv(sys.executable,[sys.executable,'-m','app.scheduler'])
+    if mode=='seed':os.execv(sys.executable,[sys.executable,'-m','app.seed','--demo'])
     raise SystemExit('Unknown container mode')
 
 if __name__=='__main__':main()

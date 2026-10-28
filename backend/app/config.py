@@ -31,6 +31,16 @@ class Settings(BaseSettings):
     @model_validator(mode='after')
     def check_secret(self):
         if len(self.jwt_secret) < 32:
+            from pathlib import Path
+            for candidate in (Path('/app/runtime/jwt-secret'), Path('runtime/jwt-secret')):
+                try:
+                    if candidate.is_file():
+                        secret = candidate.read_text().strip()
+                        if len(secret) >= 32:
+                            self.jwt_secret = secret
+                            return self
+                except OSError:
+                    pass
             raise ValueError('JWT_SECRET must contain at least 32 characters; configure .env')
         if self.jwt_algorithm != 'HS256':
             raise ValueError('Only HS256 is supported in V1')
