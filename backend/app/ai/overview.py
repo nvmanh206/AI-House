@@ -301,6 +301,20 @@ def deterministic_reply_with_overview(message: str, ov: dict, service=None) -> d
         if basic_reply:
             return {'message': basic_reply, 'intent': 'BASIC_KNOWLEDGE', 'sources': []}
 
+    # 10. Math and Arithmetic Calculation
+    math_match = re.search(r'(?:tinh(?:\s+toan)?\s+)?(\d+(?:\.\d+)?)\s*([\+\-\*\/])\s*(\d+(?:\.\d+)?)', norm)
+    if math_match:
+        try:
+            n1 = float(math_match.group(1))
+            op = math_match.group(2)
+            n2 = float(math_match.group(3))
+            calc_val = n1 + n2 if op == '+' else (n1 - n2 if op == '-' else (n1 * n2 if op == '*' else (n1 / n2 if n2 != 0 else None)))
+            if calc_val is not None:
+                calc_str = f"{int(calc_val)}" if calc_val.is_integer() else f"{calc_val:.4g}"
+                return {'message': f"Kết quả: {math_match.group(1)} {op} {math_match.group(3)} = {calc_str}.", 'intent': 'GENERAL_CHAT', 'sources': []}
+        except Exception:
+            pass
+
     # Default friendly greeting
     msg = f"Chào bạn {user['full_name']}! Mình là Trợ lý Nhà Mình. Mình có thể hỗ trợ bạn xem chỉ số, theo dõi hóa đơn, dự báo tiêu thụ và quản lý chi tiêu điện nước của hộ {house['name']}."
     return {'message': msg, 'intent': 'GENERAL_CHAT', 'sources': []}
